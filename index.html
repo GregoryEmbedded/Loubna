@@ -3,12 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fleur qui éclot</title>
+  <title>Fleur qui éclot — Couleurs chaleureuses</title>
   <style>
     :root{
-      --petal-bg-start: #ffb7d3;
-      --petal-bg-end: #ff6fa3;
-      --stem-color: #2d8a34;
+      /* palette chaleureuse */
+      --petal-bg-start: #ff9a76;   /* corail clair */
+      --petal-bg-end:   #ff5e24;   /* orange chaud */
+      --stem-color:     #3b6b2a;   /* vert légèrement chaud / olive */
+      --bg-start:       #ffd89b;   /* coucher doux */
+      --bg-end:         #ff7b54;   /* chaud */
+      --center-start:   #ffd86b;   /* doré clair */
+      --center-end:     #e89c10;   /* doré profond */
+      --card-bg:        #fff6ee;   /* carte légèrement rosée */
     }
 
     body{
@@ -18,14 +24,14 @@
       align-items: center;
       justify-content: center;
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(90deg,#fefcea,#f1da36);
+      background: linear-gradient(90deg, var(--bg-start), var(--bg-end));
     }
 
     .container{
-      background: #fff;
+      background: var(--card-bg);
       padding: 32px;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.14);
       width: 92%;
       max-width: 520px;
       text-align: center;
@@ -49,12 +55,13 @@
       bottom: 0;
       width: 8px;
       height: 120px;
-      background: var(--stem-color);
+      background: linear-gradient(180deg, #4a7d2f, var(--stem-color));
       border-radius: 6px;
       transform-origin: bottom center;
       transform: scaleY(0);
       animation: growStem 700ms cubic-bezier(.2,.9,.2,1) forwards;
       animation-delay: 250ms;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08) inset;
     }
 
     /* pétales (positionés au-dessus de la tige) */
@@ -69,9 +76,7 @@
       transform-origin: 50% 100%;  /* pivot en bas du pétale */
       transform: translateX(-50%) scale(0) rotate(var(--rot, 0deg));
       opacity: 0;
-      /* animation commune : s'ouvre (scale 0 -> 1) */
       animation: bloom 520ms cubic-bezier(.2,.9,.2,1) forwards;
-      /* on préfère laisser delays sur les classes p1..p8 */
     }
 
     /* centre de la fleur */
@@ -83,7 +88,7 @@
       height: 34px;
       transform: translateX(-50%) scale(0);
       border-radius: 50%;
-      background: radial-gradient(circle at 40% 35%, #ffe680, #f2b705);
+      background: radial-gradient(circle at 40% 35%, var(--center-start), var(--center-end));
       box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
       opacity: 0;
       animation: appearCenter 360ms ease-out forwards;
@@ -121,11 +126,12 @@
     figcaption{
       margin-top: 8px;
       font-size: 1.05rem;
-      color: #333;
+      color: #4b2f20;
       padding: 8px 12px;
       display: inline-block;
       border-radius: 8px;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,245,238,0.95);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     }
 
     /* petit ajustement pour mobile */
@@ -155,7 +161,7 @@
       </div>
 
       <figcaption>
-        "Veux-tu que l'on mange ensemble à 12h ? Greg Etchebest a fait des crêpes en plus 😉"
+        "Je t'aime mon petit coeur ;)"
       </figcaption>
     </figure>
   </div>
