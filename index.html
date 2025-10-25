@@ -1,85 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Invitation Déjeuner</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fleur qui éclot</title>
   <style>
-    body {
+    :root{
+      --petal-bg-start: #ffb7d3;
+      --petal-bg-end: #ff6fa3;
+      --stem-color: #2d8a34;
+    }
+
+    body{
       margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to right, #fefcea, #f1da36);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(90deg,#fefcea,#f1da36);
+    }
+
+    .container{
+      background: #fff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      width: 92%;
+      max-width: 520px;
       text-align: center;
     }
 
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-      max-width: 500px;
-      width: 90%;
-      position: relative;
-    }
+    figure{ margin: 0; padding: 0; }
 
-    h1 {
-      font-size: 1.8em;
-      color: #333;
-      margin-bottom: 30px;
-    }
-
-    figure {
-      margin: 0;
-      position: relative;
-    }
-
-    /* --- Fleur animée --- */
+    /* zone de la fleur */
     .flower {
+      width: 200px;
+      height: 260px;
+      margin: 0 auto 18px;
       position: relative;
-      width: 120px;
-      height: 200px;
-      margin: 0 auto 20px auto;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
+      pointer-events: none;
     }
 
-    .stem {
-      width: 6px;
-      height: 120px;
-      background: #2d8a34;
-      border-radius: 3px;
-      animation: growStem 2s ease-out forwards;
-      transform-origin: bottom;
-      opacity: 0;
-    }
-
-    .petal {
+    /* tige */
+    .stem{
       position: absolute;
-      bottom: 120px;
-      width: 40px;
-      height: 60px;
-      background: pink;
-      border-radius: 50% 50% 0 0;
-      opacity: 0;
-      transform: scale(0);
+      left: 50%;
+      bottom: 0;
+      width: 8px;
+      height: 120px;
+      background: var(--stem-color);
+      border-radius: 6px;
       transform-origin: bottom center;
-      animation: bloom 2s ease-out forwards;
+      transform: scaleY(0);
+      animation: growStem 700ms cubic-bezier(.2,.9,.2,1) forwards;
+      animation-delay: 250ms;
     }
 
-    .petal:nth-child(2) { 
-      transform: rotate(0deg);
-      animation-delay: 1s;
+    /* pétales (positionés au-dessus de la tige) */
+    .petal{
+      position: absolute;
+      left: 50%;
+      bottom: 120px;               /* hauteur de départ (au sommet de la tige) */
+      width: 64px;
+      height: 96px;
+      border-radius: 50% 50% 45% 45%;
+      background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
+      transform-origin: 50% 100%;  /* pivot en bas du pétale */
+      transform: translateX(-50%) scale(0) rotate(var(--rot, 0deg));
+      opacity: 0;
+      /* animation commune : s'ouvre (scale 0 -> 1) */
+      animation: bloom 520ms cubic-bezier(.2,.9,.2,1) forwards;
+      /* on préfère laisser delays sur les classes p1..p8 */
     }
 
-    .petal:nth-child(3) { 
-      transform: rotate(45deg);
-      animation-delay: 1.3s;
+    /* centre de la fleur */
+    .center{
+      position: absolute;
+      left: 50%;
+      bottom: 150px;
+      width: 34px;
+      height: 34px;
+      transform: translateX(-50%) scale(0);
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #ffe680, #f2b705);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
+      opacity: 0;
+      animation: appearCenter 360ms ease-out forwards;
+      animation-delay: 1250ms;
     }
 
-    .petal
+    /* chaque pétale a sa rotation et son délai pour s'ouvrir en cascade */
+    .p1 { --rot:   0deg;  animation-delay: 700ms;  left:50%; }
+    .p2 { --rot:  45deg;  animation-delay: 820ms;  left:50%; }
+    .p3 { --rot:  90deg;  animation-delay: 940ms;  left:50%; }
+    .p4 { --rot: 135deg;  animation-delay:1060ms;  left:50%; }
+    .p5 { --rot: 180deg;  animation-delay:1180ms;  left:50%; }
+    .p6 { --rot: 225deg;  animation-delay:1300ms;  left:50%; }
+    .p7 { --rot: 270deg;  animation-delay:1420ms;  left:50%; }
+    .p8 { --rot: 315deg;  animation-delay:1540ms;  left:50%; }
+
+    /* keyframes */
+    @keyframes growStem{
+      from { transform: scaleY(0); opacity: 0; }
+      to   { transform: scaleY(1); opacity: 1; }
+    }
+
+    @keyframes bloom{
+      0%   { transform: translateX(-50%) scale(0) rotate(var(--rot)); opacity: 0; }
+      60%  { transform: translateX(-50%) scale(1.06) rotate(calc(var(--rot) - 6deg)); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1)    rotate(var(--rot)); opacity: 1; }
+    }
+
+    @keyframes appearCenter{
+      from { transform: translateX(-50%) scale(0); opacity: 0; }
+      to   { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    /* texte de la légende */
+    figcaption{
+      margin-top: 8px;
+      font-size: 1.05rem;
+      color: #333;
+      padding: 8px 12px;
+      display: inline-block;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.9);
+    }
+
+    /* petit ajustement pour mobile */
+    @media (max-width:420px){
+      .flower{ transform: scale(0.9); }
+      .container{ padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <figure>
+      <div class="flower" aria-hidden="true">
+        <div class="stem"></div>
+
+        <!-- 8 pétales -->
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+        <div class="petal p5"></div>
+        <div class="petal p6"></div>
+        <div class="petal p7"></div>
+        <div class="petal p8"></div>
+
+        <div class="center"></div>
+      </div>
+
+      <figcaption>
+        "Veux-tu que l'on mange ensemble à 12h ? Greg Etchebest a fait des crêpes en plus 😉"
+      </figcaption>
+    </figure>
+  </div>
+</body>
+</html>
