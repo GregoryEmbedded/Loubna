@@ -12,7 +12,7 @@
       --card-bg:        #fff6ee;
 
       /* ciel et lune */
-      --night-duration: 6s;
+      --night-duration: 4.2s;
       --moon-delay: 0.8s;
       --moon-duration: 4.2s;
       --stars-delay: 2.2s;
@@ -122,7 +122,7 @@
       left: 50%;
       bottom: 0;
       width: 8px;
-      height: 120px;
+      height: 140px;
       background: linear-gradient(180deg, #4a7d2f, var(--stem-color));
       border-radius: 6px;
       transform-origin: bottom center;
@@ -146,21 +146,7 @@
       animation: bloom 520ms cubic-bezier(.2,.9,.2,1) forwards;
     }
 
-    .center{
-      position: absolute;
-      left: 50%;
-      bottom: 150px;
-      width: 34px;
-      height: 34px;
-      transform: translateX(-50%) scale(0);
-      border-radius: 50%;
-      background: radial-gradient(circle at 40% 35%, #ffd86b, #e89c10);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
-      opacity: 0;
-      animation: appearCenter 360ms ease-out forwards;
-      /* s'affiche après la plupart des pétales */
-      animation-delay: 2200ms;
-    }
+  
 
     /* 24 pétales : rotation de 15° entre chaque, delays explicites (700ms + i*60ms) */
     .p1  { --rot: 0deg;   animation-delay: 700ms;  }
