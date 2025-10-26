@@ -18,6 +18,7 @@
       --stars-delay: 2.2s;
     }
 
+    *{box-sizing:border-box}
     body{
       margin: 0;
       min-height: 100vh;
@@ -157,12 +158,35 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
       opacity: 0;
       animation: appearCenter 360ms ease-out forwards;
-      animation-delay: 1250ms;
+      /* s'affiche après la plupart des pétales */
+      animation-delay: 2200ms;
     }
 
-    /* 24 pétales : rotation de 15° entre chaque */
-    /* chaque pétale a un petit décalage de délai */
-    ${Array.from({length:24}, (_,i)=>`.p${i+1}{--rot:${i*15}deg;animation-delay:${700+120*i/24}ms;left:50%;}`).join("\n")}
+    /* 24 pétales : rotation de 15° entre chaque, delays explicites (700ms + i*60ms) */
+    .p1  { --rot: 0deg;   animation-delay: 700ms;  }
+    .p2  { --rot: 15deg;  animation-delay: 760ms;  }
+    .p3  { --rot: 30deg;  animation-delay: 820ms;  }
+    .p4  { --rot: 45deg;  animation-delay: 880ms;  }
+    .p5  { --rot: 60deg;  animation-delay: 940ms;  }
+    .p6  { --rot: 75deg;  animation-delay: 1000ms; }
+    .p7  { --rot: 90deg;  animation-delay: 1060ms; }
+    .p8  { --rot:105deg;  animation-delay: 1120ms; }
+    .p9  { --rot:120deg;  animation-delay: 1180ms; }
+    .p10 { --rot:135deg;  animation-delay: 1240ms; }
+    .p11 { --rot:150deg;  animation-delay: 1300ms; }
+    .p12 { --rot:165deg;  animation-delay: 1360ms; }
+    .p13 { --rot:180deg;  animation-delay: 1420ms; }
+    .p14 { --rot:195deg;  animation-delay: 1480ms; }
+    .p15 { --rot:210deg;  animation-delay: 1540ms; }
+    .p16 { --rot:225deg;  animation-delay: 1600ms; }
+    .p17 { --rot:240deg;  animation-delay: 1660ms; }
+    .p18 { --rot:255deg;  animation-delay: 1720ms; }
+    .p19 { --rot:270deg;  animation-delay: 1780ms; }
+    .p20 { --rot:285deg;  animation-delay: 1840ms; }
+    .p21 { --rot:300deg;  animation-delay: 1900ms; }
+    .p22 { --rot:315deg;  animation-delay: 1960ms; }
+    .p23 { --rot:330deg;  animation-delay: 2020ms; }
+    .p24 { --rot:345deg;  animation-delay: 2080ms; }
 
     @keyframes growStem{
       from { transform: scaleY(0); opacity: 0; }
@@ -197,8 +221,9 @@
   </style>
 </head>
 <body>
-  <div class="sky"></div>
-  <div class="stars">
+  <div class="sky" aria-hidden="true"></div>
+
+  <div class="stars" aria-hidden="true">
     <div class="star" style="left:8%;  top:10%;  animation-delay: calc(var(--stars-delay) + 0.2s);"></div>
     <div class="star" style="left:18%; top:18%; animation-delay: calc(var(--stars-delay) + 0.6s);"></div>
     <div class="star" style="left:26%; top:8%;  animation-delay: calc(var(--stars-delay) + 0.9s);"></div>
@@ -209,16 +234,43 @@
     <div class="star" style="left:78%; top:12%; animation-delay: calc(var(--stars-delay) + 2.6s);"></div>
     <div class="star" style="left:88%; top:9%;  animation-delay: calc(var(--stars-delay) + 3.0s);"></div>
   </div>
-  <div class="moon"></div>
 
-  <div class="container">
+  <div class="moon" aria-hidden="true"></div>
+
+  <div class="container" role="main">
     <figure>
-      <div class="flower">
+      <div class="flower" aria-hidden="true">
         <div class="stem"></div>
+
         <!-- 24 pétales -->
-        ${Array.from({length:24}, (_,i)=>`<div class="petal p${i+1}"></div>`).join("\n")}
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+        <div class="petal p5"></div>
+        <div class="petal p6"></div>
+        <div class="petal p7"></div>
+        <div class="petal p8"></div>
+        <div class="petal p9"></div>
+        <div class="petal p10"></div>
+        <div class="petal p11"></div>
+        <div class="petal p12"></div>
+        <div class="petal p13"></div>
+        <div class="petal p14"></div>
+        <div class="petal p15"></div>
+        <div class="petal p16"></div>
+        <div class="petal p17"></div>
+        <div class="petal p18"></div>
+        <div class="petal p19"></div>
+        <div class="petal p20"></div>
+        <div class="petal p21"></div>
+        <div class="petal p22"></div>
+        <div class="petal p23"></div>
+        <div class="petal p24"></div>
+
         <div class="center"></div>
       </div>
+
       <figcaption>
         "Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"
       </figcaption>
