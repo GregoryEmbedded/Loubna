@@ -240,13 +240,13 @@ figcaption {
     }, dayDelay);
 
     // typing
-    const text = `"Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"`;
+    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très bonne journée mon coeur, fais attention à toi. Je t'aime très fort mon coeur"`;
     const target = document.getElementById('typing');
     const caret = document.getElementById('caret');
     startTyping(text, target, caret, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200);
 
     // fireworks (optional) - keep gentle frequency
-    const fwInterval = setInterval(createFirework, 900);
+    const fwInterval = setInterval(createFirework, 100);
     // stop fireworks after day has fully settled (optional)
     setTimeout(()=> clearInterval(fwInterval), 12000);
 
