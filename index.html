@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Je t'aime</title>
+  <title>Je t'aime — lever du soleil</title>
   <style>
     :root{
       --petal-bg-start: #ff9a76;
@@ -11,11 +11,13 @@
       --stem-color:     #3b6b2a;
       --card-bg:        #fff6ee;
 
-      /* ciel et lune */
-      --night-duration: 4.2s;
-      --moon-delay: 0.8s;
-      --moon-duration: 4.2s;
-      --stars-delay: 2.2s;
+      /* timing (ajustables) */
+      --day-duration: 7s;     /* durée totale transition nuit → jour */
+      --sun-delay: 0.6s;      /* délai avant lever du soleil */
+      --sun-duration: 4.8s;   /* durée du lever de soleil */
+      --stars-delay: 0.6s;    /* début apparition étoiles (peut rester) */
+      --type-delay: 2200;     /* délai avant début de l'apparition du texte (ms) */
+      --type-speed: 36;       /* vitesse de frappe en ms par caractère */
     }
 
     *{box-sizing:border-box}
@@ -26,58 +28,70 @@
       align-items: center;
       justify-content: center;
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f7f3ee;
+      background: #020617;
       position: relative;
       overflow: hidden;
     }
 
-    /* --- arrière-plan animé --- */
+    /* --- SKY : nuit -> aube -> jour --- */
     .sky{
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, #ffd89b 0%, #ff7b54 40%, #87ceeb 100%);
-      animation: dayToNight var(--night-duration) forwards;
+      background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); /* départ: nuit */
+      animation: nightToDay var(--day-duration) forwards;
+      animation-delay: 0s;
+    }
+    @keyframes nightToDay{
+      0% {
+        background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); /* nuit */
+      }
+      40% {
+        background: linear-gradient(180deg, #081233 0%, #2a3c6b 45%, #ffd89b 100%); /* aube intermédiaire */
+      }
+      70% {
+        background: linear-gradient(180deg, #ffdd9b 0%, #ffb07a 45%, #ffd89b 100%); /* fort aube / orangé */
+      }
+      100% {
+        background: linear-gradient(180deg, #ffd89b 0%, #ff7b54 45%, #87ceeb 100%); /* jour */
+      }
     }
 
-    @keyframes dayToNight{
-      0%   { background: linear-gradient(180deg, #ffd89b 0%, #ff7b54 40%, #87ceeb 100%); }
-      60%  { background: linear-gradient(180deg, #ffb77a 0%, #ff6a3d 45%, #6fb0e8 100%); }
-      100% { background: linear-gradient(180deg, #0b2545 0%, #081325 60%, #020617 100%); }
-    }
-
-    .moon{
+    /* soleil (remplace la lune) */
+    .sun{
       position: fixed;
-      left: 72%;
-      bottom: -140px;
-      width: 120px;
-      height: 120px;
+      left: 20%;
+      bottom: -180px; /* commence hors écran */
+      width: 160px;
+      height: 160px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #fffdf7 0%, #fff1cc 40%, #f6e4a1 70%, #e0c86a 100%);
-      box-shadow: 0 0 0 rgba(255,240,200,0.0);
-      transform: translateY(0) scale(0.92);
+      background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
+      box-shadow: 0 0 0 rgba(255,180,80,0.0);
+      transform: translateY(0) scale(0.9);
       z-index: 1;
       animation:
-        moonRise var(--moon-duration) cubic-bezier(.2,.9,.2,1) var(--moon-delay) forwards,
-        moonGlow 2.6s ease var(--moon-delay) forwards;
+        sunRise var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay) forwards,
+        sunGlow 3s ease var(--sun-delay) forwards;
+    }
+    @keyframes sunRise{
+      0%   { bottom: -180px; transform: translateY(0) scale(0.6); opacity: 0; }
+      60%  { bottom: 12vh;   transform: translateY(-6px) scale(1.06); opacity: 1; }
+      100% { bottom: 20vh;   transform: translateY(0)    scale(1); opacity: 1; }
+    }
+    @keyframes sunGlow{
+      0%   { box-shadow: 0 0 0 rgba(255,160,60,0); filter: blur(0px); }
+      100% { box-shadow: 0 0 120px rgba(255,160,60,0.18); filter: blur(1px); }
     }
 
-    @keyframes moonRise{
-      0%   { bottom: -140px; transform: translateY(0) scale(0.8); opacity: 0; }
-      60%  { bottom: 18vh;  transform: translateY(-6px) scale(1.04); opacity: 1; }
-      100% { bottom: 22vh;  transform: translateY(0)    scale(1); opacity: 1; }
-    }
-    @keyframes moonGlow{
-      0%   { box-shadow: 0 0 0 rgba(255,240,200,0); filter: blur(0px); }
-      100% { box-shadow: 0 0 60px rgba(255,240,200,0.15); filter: blur(1px); }
-    }
-
+    /* étoiles (s'estompent à l'aube automatiquement car sky change) */
     .stars{
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
+      opacity: 1;
+      transition: opacity 1.2s linear;
     }
     .star{
       position: absolute;
@@ -122,7 +136,7 @@
       left: 50%;
       bottom: 0;
       width: 8px;
-      height: 140px;
+      height: 120px;
       background: linear-gradient(180deg, #4a7d2f, var(--stem-color));
       border-radius: 6px;
       transform-origin: bottom center;
@@ -146,7 +160,20 @@
       animation: bloom 520ms cubic-bezier(.2,.9,.2,1) forwards;
     }
 
-  
+    .center{
+      position: absolute;
+      left: 50%;
+      bottom: 150px;
+      width: 34px;
+      height: 34px;
+      transform: translateX(-50%) scale(0);
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #ffd86b, #e89c10);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
+      opacity: 0;
+      animation: appearCenter 360ms ease-out forwards;
+      animation-delay: 2200ms;
+    }
 
     /* 24 pétales : rotation de 15° entre chaque, delays explicites (700ms + i*60ms) */
     .p1  { --rot: 0deg;   animation-delay: 700ms;  }
@@ -188,6 +215,7 @@
       to   { transform: translateX(-50%) scale(1); opacity: 1; }
     }
 
+    /* figcaption : zone pour le texte à taper */
     figcaption{
       margin-top: 8px;
       font-size: 1.05rem;
@@ -197,19 +225,45 @@
       border-radius: 8px;
       background: rgba(255,245,238,0.95);
       box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      min-height: 42px;
+      overflow: visible;
     }
+    /* zone texte "tapée" + curseur */
+    .typing {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: middle;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1.05rem;
+      color: #4b2f20;
+    }
+    .caret{
+      display: inline-block;
+      width: 10px;
+      margin-left: 4px;
+      background: linear-gradient(180deg,#4b2f20,#4b2f20);
+      height: 1.15em;
+      vertical-align: bottom;
+      animation: blink 900ms steps(2,end) infinite;
+      opacity: 0; /* caché au départ — affiché quand la frappe commence */
+    }
+    @keyframes blink { 0%,50% { opacity: 1 } 51%,100% { opacity: 0 } }
 
+    /* responsive */
     @media (max-width:420px){
       .flower{ transform: scale(0.9); }
       .container{ padding: 22px; }
-      .moon{ left: 60%; width: 90px; height: 90px; }
+      .sun{ left: 60%; width: 110px; height: 110px; }
     }
   </style>
 </head>
 <body>
+  <!-- ciel animé -->
   <div class="sky" aria-hidden="true"></div>
 
-  <div class="stars" aria-hidden="true">
+  <!-- étoiles -->
+  <div class="stars" aria-hidden="true" id="stars">
     <div class="star" style="left:8%;  top:10%;  animation-delay: calc(var(--stars-delay) + 0.2s);"></div>
     <div class="star" style="left:18%; top:18%; animation-delay: calc(var(--stars-delay) + 0.6s);"></div>
     <div class="star" style="left:26%; top:8%;  animation-delay: calc(var(--stars-delay) + 0.9s);"></div>
@@ -221,7 +275,8 @@
     <div class="star" style="left:88%; top:9%;  animation-delay: calc(var(--stars-delay) + 3.0s);"></div>
   </div>
 
-  <div class="moon" aria-hidden="true"></div>
+  <!-- soleil -->
+  <div class="sun" aria-hidden="true"></div>
 
   <div class="container" role="main">
     <figure>
@@ -257,10 +312,56 @@
         <div class="center"></div>
       </div>
 
-      <figcaption>
-        "Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"
+      <figcaption aria-live="polite">
+        <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
       </figcaption>
     </figure>
   </div>
+
+  <script>
+    // === Typing effect for the figcaption ===
+    (function(){
+      const text = `"Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"`;
+      const target = document.getElementById('typing');
+      const caret = document.getElementById('caret');
+      const delayBeforeStart = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200;
+      const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36;
+
+      // Reset
+      target.textContent = '';
+      caret.style.opacity = '0';
+
+      function type() {
+        caret.style.opacity = '1';
+        let i = 0;
+        const interval = setInterval(() => {
+          target.textContent += text[i] || '';
+          i++;
+          // small scroll protection for long text
+          if (i >= text.length) {
+            clearInterval(interval);
+            // stop caret after a small pause
+            setTimeout(()=>{ caret.style.opacity = '0'; }, 800);
+          }
+        }, speed);
+      }
+
+      // start typing after the requested delay (ms)
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(type, delayBeforeStart);
+      });
+    })();
+
+    // === Optional: fade out stars as the sky brightens ===
+    (function(){
+      const stars = document.getElementById('stars');
+      const dayDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--day-duration')) || 7;
+      // schedule stars fade as dawn approaches (70% of dayDuration)
+      const fadeAt = Math.max( (dayDuration * 0.55), 0.6 );
+      setTimeout(()=> {
+        if (stars) stars.style.opacity = '0';
+      }, fadeAt * 1000);
+    })();
+  </script>
 </body>
 </html>
