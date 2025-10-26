@@ -1,367 +1,212 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Je t'aime — lever du soleil</title>
-  <style>
-    :root{
-      --petal-bg-start: #ff9a76;
-      --petal-bg-end:   #ff5e24;
-      --stem-color:     #3b6b2a;
-      --card-bg:        #fff6ee;
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Je t’aime — lever du soleil</title>
+<style>
+:root {
+  --petal-bg-start: #ff4b4b;
+  --petal-bg-end: #b30000;
+  --stem-color: #2e7d32;
+  --day-duration: 7s;
+  --sun-delay: 0.6s;
+  --sun-duration: 4.8s;
+  --type-delay: 2200;
+  --type-speed: 36;
+}
 
-      /* timing (ajustables) */
-      --day-duration: 7s;     /* durée totale transition nuit → jour */
-      --sun-delay: 0.6s;      /* délai avant lever du soleil */
-      --sun-duration: 4.8s;   /* durée du lever de soleil */
-      --stars-delay: 0.6s;    /* début apparition étoiles (peut rester) */
-      --type-delay: 2200;     /* délai avant début de l'apparition du texte (ms) */
-      --type-speed: 36;       /* vitesse de frappe en ms par caractère */
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: #020617;
-      position: relative;
-      overflow: hidden;
-    }
+/* CIEL */
+.sky {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%);
+  animation: nightToDay var(--day-duration) forwards;
+}
+@keyframes nightToDay {
+  0% { background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); }
+  50% { background: linear-gradient(180deg, #2a3c6b 0%, #ffb07a 70%, #ffd89b 100%); }
+  100% { background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%); }
+}
 
-    /* --- SKY : nuit -> aube -> jour --- */
-    .sky{
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); /* départ: nuit */
-      animation: nightToDay var(--day-duration) forwards;
-      animation-delay: 0s;
-    }
-    @keyframes nightToDay{
-      0% {
-        background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); /* nuit */
-      }
-      40% {
-        background: linear-gradient(180deg, #081233 0%, #2a3c6b 45%, #ffd89b 100%); /* aube intermédiaire */
-      }
-      70% {
-        background: linear-gradient(180deg, #ffdd9b 0%, #ffb07a 45%, #ffd89b 100%); /* fort aube / orangé */
-      }
-      100% {
-        background: linear-gradient(180deg, #ffd89b 0%, #ff7b54 45%, #87ceeb 100%); /* jour */
-      }
-    }
+/* SOLEIL */
+.sun {
+  position: fixed;
+  left: 20%;
+  bottom: -180px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
+  animation: sunRise var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay) forwards;
+}
+@keyframes sunRise {
+  0% { bottom: -180px; opacity: 0; transform: scale(0.6); }
+  60% { bottom: 12vh; opacity: 1; transform: scale(1.06); }
+  100% { bottom: 20vh; opacity: 1; transform: scale(1); }
+}
 
-    /* soleil (remplace la lune) */
-    .sun{
-      position: fixed;
-      left: 20%;
-      bottom: -180px; /* commence hors écran */
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
-      box-shadow: 0 0 0 rgba(255,180,80,0.0);
-      transform: translateY(0) scale(0.9);
-      z-index: 1;
-      animation:
-        sunRise var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay) forwards,
-        sunGlow 3s ease var(--sun-delay) forwards;
-    }
-    @keyframes sunRise{
-      0%   { bottom: -180px; transform: translateY(0) scale(0.6); opacity: 0; }
-      60%  { bottom: 12vh;   transform: translateY(-6px) scale(1.06); opacity: 1; }
-      100% { bottom: 20vh;   transform: translateY(0)    scale(1); opacity: 1; }
-    }
-    @keyframes sunGlow{
-      0%   { box-shadow: 0 0 0 rgba(255,160,60,0); filter: blur(0px); }
-      100% { box-shadow: 0 0 120px rgba(255,160,60,0.18); filter: blur(1px); }
-    }
+/* FEUX D’ARTIFICE */
+.firework {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  animation: explode 1.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes explode {
+  0% { transform: scale(0); opacity: 1; }
+  80% { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
 
-    /* étoiles (s'estompent à l'aube automatiquement car sky change) */
-    .stars{
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 1;
-      transition: opacity 1.2s linear;
-    }
-    .star{
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      border-radius: 50%;
-      background: white;
-      opacity: 0;
-      transform: scale(0.6);
-      filter: drop-shadow(0 0 2px rgba(255,255,255,0.9));
-      animation: starAppear 1.2s ease forwards;
-    }
-    @keyframes starAppear{
-      from { opacity: 0; transform: scale(0.6); }
-      to   { opacity: 1; transform: scale(1); }
-    }
+/* FLEUR */
+.flower {
+  width: 200px;
+  height: 340px;
+  position: relative;
+  margin-bottom: 80px;
+}
+.stem {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 10px;
+  height: 240px;
+  background: linear-gradient(180deg, #3f8a3a, var(--stem-color));
+  border-radius: 6px;
+  transform-origin: bottom center;
+  animation: growStem 1s ease-out forwards;
+  animation-delay: 0.3s;
+}
+@keyframes growStem {
+  from { transform: scaleY(0); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}
 
-    .container{
-      position: relative;
-      z-index: 2;
-      background: var(--card-bg);
-      padding: 32px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.14);
-      width: 92%;
-      max-width: 520px;
-      text-align: center;
-    }
+.petal {
+  position: absolute;
+  left: 50%;
+  bottom: 240px;
+  width: 72px;
+  height: 108px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
+  animation: bloom 600ms cubic-bezier(.2,.9,.2,1) forwards;
+}
+@keyframes bloom {
+  0% { transform: translateX(-50%) scale(0) rotate(var(--rot)); opacity: 0; }
+  70% { transform: translateX(-50%) scale(1.06) rotate(calc(var(--rot) - 6deg)); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) rotate(var(--rot)); opacity: 1; }
+}
+/* 36 pétales */
+.petal:nth-child(n) { animation-delay: calc(0.8s + var(--n, 0) * 0.04s); }
 
-    figure{ margin: 0; padding: 0; }
-
-    .flower {
-      width: 200px;
-      height: 260px;
-      margin: 0 auto 18px;
-      position: relative;
-      pointer-events: none;
-    }
-
-    .stem{
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      width: 8px;
-      height: 120px;
-      background: linear-gradient(180deg, #4a7d2f, var(--stem-color));
-      border-radius: 6px;
-      transform-origin: bottom center;
-      transform: scaleY(0);
-      animation: growStem 700ms cubic-bezier(.2,.9,.2,1) forwards;
-      animation-delay: 250ms;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08) inset;
-    }
-
-    .petal{
-      position: absolute;
-      left: 50%;
-      bottom: 120px;
-      width: 64px;
-      height: 96px;
-      border-radius: 50% 50% 45% 45%;
-      background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
-      transform-origin: 50% 100%;
-      transform: translateX(-50%) scale(0) rotate(var(--rot, 0deg));
-      opacity: 0;
-      animation: bloom 520ms cubic-bezier(.2,.9,.2,1) forwards;
-    }
-
-    .center{
-      position: absolute;
-      left: 50%;
-      bottom: 150px;
-      width: 34px;
-      height: 34px;
-      transform: translateX(-50%) scale(0);
-      border-radius: 50%;
-      background: radial-gradient(circle at 40% 35%, #ffd86b, #e89c10);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
-      opacity: 0;
-      animation: appearCenter 360ms ease-out forwards;
-      animation-delay: 2200ms;
-    }
-
-    /* 24 pétales : rotation de 15° entre chaque, delays explicites (700ms + i*60ms) */
-    .p1  { --rot: 0deg;   animation-delay: 700ms;  }
-    .p2  { --rot: 15deg;  animation-delay: 760ms;  }
-    .p3  { --rot: 30deg;  animation-delay: 820ms;  }
-    .p4  { --rot: 45deg;  animation-delay: 880ms;  }
-    .p5  { --rot: 60deg;  animation-delay: 940ms;  }
-    .p6  { --rot: 75deg;  animation-delay: 1000ms; }
-    .p7  { --rot: 90deg;  animation-delay: 1060ms; }
-    .p8  { --rot:105deg;  animation-delay: 1120ms; }
-    .p9  { --rot:120deg;  animation-delay: 1180ms; }
-    .p10 { --rot:135deg;  animation-delay: 1240ms; }
-    .p11 { --rot:150deg;  animation-delay: 1300ms; }
-    .p12 { --rot:165deg;  animation-delay: 1360ms; }
-    .p13 { --rot:180deg;  animation-delay: 1420ms; }
-    .p14 { --rot:195deg;  animation-delay: 1480ms; }
-    .p15 { --rot:210deg;  animation-delay: 1540ms; }
-    .p16 { --rot:225deg;  animation-delay: 1600ms; }
-    .p17 { --rot:240deg;  animation-delay: 1660ms; }
-    .p18 { --rot:255deg;  animation-delay: 1720ms; }
-    .p19 { --rot:270deg;  animation-delay: 1780ms; }
-    .p20 { --rot:285deg;  animation-delay: 1840ms; }
-    .p21 { --rot:300deg;  animation-delay: 1900ms; }
-    .p22 { --rot:315deg;  animation-delay: 1960ms; }
-    .p23 { --rot:330deg;  animation-delay: 2020ms; }
-    .p24 { --rot:345deg;  animation-delay: 2080ms; }
-
-    @keyframes growStem{
-      from { transform: scaleY(0); opacity: 0; }
-      to   { transform: scaleY(1); opacity: 1; }
-    }
-    @keyframes bloom{
-      0%   { transform: translateX(-50%) scale(0) rotate(var(--rot)); opacity: 0; }
-      60%  { transform: translateX(-50%) scale(1.06) rotate(calc(var(--rot) - 6deg)); opacity: 1; }
-      100% { transform: translateX(-50%) scale(1)    rotate(var(--rot)); opacity: 1; }
-    }
-    @keyframes appearCenter{
-      from { transform: translateX(-50%) scale(0); opacity: 0; }
-      to   { transform: translateX(-50%) scale(1); opacity: 1; }
-    }
-
-    /* figcaption : zone pour le texte à taper */
-    figcaption{
-      margin-top: 8px;
-      font-size: 1.05rem;
-      color: #4b2f20;
-      padding: 8px 12px;
-      display: inline-block;
-      border-radius: 8px;
-      background: rgba(255,245,238,0.95);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-      min-height: 42px;
-      overflow: visible;
-    }
-    /* zone texte "tapée" + curseur */
-    .typing {
-      display: inline-block;
-      white-space: nowrap;
-      overflow: hidden;
-      vertical-align: middle;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      font-size: 1.05rem;
-      color: #4b2f20;
-    }
-    .caret{
-      display: inline-block;
-      width: 10px;
-      margin-left: 4px;
-      background: linear-gradient(180deg,#4b2f20,#4b2f20);
-      height: 1.15em;
-      vertical-align: bottom;
-      animation: blink 900ms steps(2,end) infinite;
-      opacity: 0; /* caché au départ — affiché quand la frappe commence */
-    }
-    @keyframes blink { 0%,50% { opacity: 1 } 51%,100% { opacity: 0 } }
-
-    /* responsive */
-    @media (max-width:420px){
-      .flower{ transform: scale(0.9); }
-      .container{ padding: 22px; }
-      .sun{ left: 60%; width: 110px; height: 110px; }
-    }
-  </style>
+/* TEXTE */
+figcaption {
+  font-size: 1.2rem;
+  color: #fffdf4;
+  text-align: center;
+  margin-bottom: 100px;
+  text-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+.typing {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.caret {
+  display: inline-block;
+  width: 10px;
+  height: 1.15em;
+  background: #fff;
+  animation: blink 900ms steps(2,end) infinite;
+}
+@keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
+</style>
 </head>
 <body>
-  <!-- ciel animé -->
-  <div class="sky" aria-hidden="true"></div>
+<div class="sky"></div>
+<div class="sun"></div>
 
-  <!-- étoiles -->
-  <div class="stars" aria-hidden="true" id="stars">
-    <div class="star" style="left:8%;  top:10%;  animation-delay: calc(var(--stars-delay) + 0.2s);"></div>
-    <div class="star" style="left:18%; top:18%; animation-delay: calc(var(--stars-delay) + 0.6s);"></div>
-    <div class="star" style="left:26%; top:8%;  animation-delay: calc(var(--stars-delay) + 0.9s);"></div>
-    <div class="star" style="left:36%; top:14%; animation-delay: calc(var(--stars-delay) + 1.1s);"></div>
-    <div class="star" style="left:48%; top:6%;  animation-delay: calc(var(--stars-delay) + 1.6s);"></div>
-    <div class="star" style="left:58%; top:10%; animation-delay: calc(var(--stars-delay) + 1.9s);"></div>
-    <div class="star" style="left:68%; top:5%;  animation-delay: calc(var(--stars-delay) + 2.3s);"></div>
-    <div class="star" style="left:78%; top:12%; animation-delay: calc(var(--stars-delay) + 2.6s);"></div>
-    <div class="star" style="left:88%; top:9%;  animation-delay: calc(var(--stars-delay) + 3.0s);"></div>
-  </div>
-
-  <!-- soleil -->
-  <div class="sun" aria-hidden="true"></div>
-
-  <div class="container" role="main">
-    <figure>
-      <div class="flower" aria-hidden="true">
-        <div class="stem"></div>
-
-        <!-- 24 pétales -->
-        <div class="petal p1"></div>
-        <div class="petal p2"></div>
-        <div class="petal p3"></div>
-        <div class="petal p4"></div>
-        <div class="petal p5"></div>
-        <div class="petal p6"></div>
-        <div class="petal p7"></div>
-        <div class="petal p8"></div>
-        <div class="petal p9"></div>
-        <div class="petal p10"></div>
-        <div class="petal p11"></div>
-        <div class="petal p12"></div>
-        <div class="petal p13"></div>
-        <div class="petal p14"></div>
-        <div class="petal p15"></div>
-        <div class="petal p16"></div>
-        <div class="petal p17"></div>
-        <div class="petal p18"></div>
-        <div class="petal p19"></div>
-        <div class="petal p20"></div>
-        <div class="petal p21"></div>
-        <div class="petal p22"></div>
-        <div class="petal p23"></div>
-        <div class="petal p24"></div>
-
-        <div class="center"></div>
-      </div>
-
-      <figcaption aria-live="polite">
-        <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
-      </figcaption>
-    </figure>
-  </div>
-
+<div class="flower">
+  <div class="stem"></div>
+  <!-- pétales -->
   <script>
-    // === Typing effect for the figcaption ===
-    (function(){
-      const text = `" Bonjour mon petit coeur, j'espère que tu as bien dormi honey! Prends soin de toi, et fais de ce jour un moment unique et particulier. Je t'aime mon amour, ma chérie, ma femme. Tu comptes énormément pour moi"`;
-      const target = document.getElementById('typing');
-      const caret = document.getElementById('caret');
-      const delayBeforeStart = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200;
-      const speed = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36;
-
-      // Reset
-      target.textContent = '';
-      caret.style.opacity = '0';
-
-      function type() {
-        caret.style.opacity = '1';
-        let i = 0;
-        const interval = setInterval(() => {
-          target.textContent += text[i] || '';
-          i++;
-          // small scroll protection for long text
-          if (i >= text.length) {
-            clearInterval(interval);
-            // stop caret after a small pause
-            setTimeout(()=>{ caret.style.opacity = '0'; }, 800);
-          }
-        }, speed);
+    // Génère 36 pétales
+    document.addEventListener("DOMContentLoaded", ()=>{
+      const flower=document.querySelector(".flower");
+      for(let i=0;i<36;i++){
+        const p=document.createElement("div");
+        p.className="petal";
+        p.style.setProperty("--rot",`${i*10}deg`);
+        p.style.setProperty("--n",i);
+        flower.appendChild(p);
       }
-
-      // start typing after the requested delay (ms)
-      window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(type, delayBeforeStart);
-      });
-    })();
-
-    // === Optional: fade out stars as the sky brightens ===
-    (function(){
-      const stars = document.getElementById('stars');
-      const dayDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--day-duration')) || 7;
-      // schedule stars fade as dawn approaches (70% of dayDuration)
-      const fadeAt = Math.max( (dayDuration * 0.55), 0.6 );
-      setTimeout(()=> {
-        if (stars) stars.style.opacity = '0';
-      }, fadeAt * 1000);
-    })();
+    });
   </script>
+</div>
+
+<figcaption>
+  <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
+</figcaption>
+
+<script>
+/* --- Texte progressif --- */
+(function(){
+  const text = `"Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"`;
+  const target = document.getElementById('typing');
+  const caret = document.getElementById('caret');
+  const delayBeforeStart = 2200;
+  const speed = 36;
+  target.textContent = '';
+  caret.style.opacity = '0';
+  function type() {
+    caret.style.opacity = '1';
+    let i = 0;
+    const interval = setInterval(() => {
+      target.textContent += text[i] || '';
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        setTimeout(()=>{ caret.style.opacity = '0'; }, 800);
+      }
+    }, speed);
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(type, delayBeforeStart);
+  });
+})();
+
+/* --- Feux d’artifice --- */
+function createFirework() {
+  const fw = document.createElement("div");
+  fw.className = "firework";
+  const colors = ["#ffcc00","#ff6699","#66ccff","#ff4444","#00ffcc"];
+  fw.style.background = colors[Math.floor(Math.random()*colors.length)];
+  fw.style.left = Math.random() * window.innerWidth + "px";
+  fw.style.top = (Math.random() * window.innerHeight * 0.6) + "px";
+  document.body.appendChild(fw);
+  setTimeout(()=>fw.remove(),1500);
+}
+setInterval(createFirework, 800);
+</script>
 </body>
 </html>
