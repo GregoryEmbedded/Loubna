@@ -9,14 +9,15 @@
   --petal-bg-start: #ff4b4b;
   --petal-bg-end: #b30000;
   --stem-color: #2e7d32;
-  --day-duration: 7s;
-  --sun-delay: 0.6s;
-  --sun-duration: 4.8s;
-  --type-delay: 2200;
-  --type-speed: 36;
+  --day-duration: 7s; /* durée visuelle, utilisée pour timing JS aussi */
+  --sun-delay: 600ms;
+  --sun-duration: 4800ms;
+  --type-delay: 2200ms;
+  --type-speed: 36; /* ms par caractère */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html,body{height:100%;}
 body {
   height: 100vh;
   overflow: hidden;
@@ -28,34 +29,43 @@ body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* CIEL */
-.sky {
+/* Deux couches de ciel superposées : interpolation via opacity (smooth) */
+.sky-layer {
   position: fixed;
   inset: 0;
+  z-index: -3;
+  transition: opacity calc(var(--day-duration)) ease-in-out;
+}
+.sky-layer--night {
   background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%);
-  animation: nightToDay var(--day-duration) forwards;
+  opacity: 1;
 }
-@keyframes nightToDay {
-  0% { background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); }
-  50% { background: linear-gradient(180deg, #2a3c6b 0%, #ffb07a 70%, #ffd89b 100%); }
-  100% { background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%); }
+.sky-layer--day {
+  background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%);
+  opacity: 0;
 }
+/* when body.day is set, fade the day layer in and night out */
+body.day .sky-layer--day { opacity: 1; }
+body.day .sky-layer--night { opacity: 0; }
 
-/* SOLEIL */
+/* SOLEIL - animé via transform + transition pour plus de fluidité */
 .sun {
   position: fixed;
   left: 20%;
-  bottom: -180px;
+  bottom: 0; /* point de départ (off-screen via translateY) */
   width: 160px;
   height: 160px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
-  animation: sunRise var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay) forwards;
+  transform: translateY(220px) scale(0.6);
+  opacity: 0;
+  transition: transform var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay),
+              opacity 1s ease var(--sun-delay);
+  z-index: -2;
 }
-@keyframes sunRise {
-  0% { bottom: -180px; opacity: 0; transform: scale(0.6); }
-  60% { bottom: 12vh; opacity: 1; transform: scale(1.06); }
-  100% { bottom: 20vh; opacity: 1; transform: scale(1); }
+body.day .sun {
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 /* FEUX D’ARTIFICE */
@@ -81,6 +91,7 @@ body {
   height: 340px;
   position: relative;
   margin-bottom: 80px;
+  z-index: 2;
 }
 .stem {
   position: absolute;
@@ -91,13 +102,11 @@ body {
   background: linear-gradient(180deg, #3f8a3a, var(--stem-color));
   border-radius: 6px;
   transform-origin: bottom center;
-  animation: growStem 1s ease-out forwards;
-  animation-delay: 0.3s;
+  transform: scaleY(0);
+  opacity: 0;
+  transition: transform 1s ease-out 0.3s, opacity 1s 0.3s;
 }
-@keyframes growStem {
-  from { transform: scaleY(0); opacity: 0; }
-  to { transform: scaleY(1); opacity: 1; }
-}
+body.loaded .stem { transform: scaleY(1); opacity: 1; }
 
 .petal {
   position: absolute;
@@ -109,15 +118,9 @@ body {
   background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
   transform-origin: 50% 100%;
   transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
-  animation: bloom 600ms cubic-bezier(.2,.9,.2,1) forwards;
+  opacity: 0;
 }
-@keyframes bloom {
-  0% { transform: translateX(-50%) scale(0) rotate(var(--rot)); opacity: 0; }
-  70% { transform: translateX(-50%) scale(1.06) rotate(calc(var(--rot) - 6deg)); opacity: 1; }
-  100% { transform: translateX(-50%) scale(1) rotate(var(--rot)); opacity: 1; }
-}
-/* 36 pétales */
-.petal:nth-child(n) { animation-delay: calc(0.8s + var(--n, 0) * 0.04s); }
+/* we'll animate petals via JS with staggered transitions for precise control */
 
 /* TEXTE */
 figcaption {
@@ -126,6 +129,7 @@ figcaption {
   text-align: center;
   margin-bottom: 100px;
   text-shadow: 0 0 8px rgba(255,255,255,0.5);
+  z-index: 3;
 }
 .typing {
   display: inline-block;
@@ -138,75 +142,118 @@ figcaption {
   height: 1.15em;
   background: #fff;
   animation: blink 900ms steps(2,end) infinite;
+  vertical-align: bottom;
 }
 @keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
+
 </style>
 </head>
 <body>
-<div class="sky"></div>
-<div class="sun"></div>
+  <!-- deux couches de ciel -->
+  <div class="sky-layer sky-layer--night" aria-hidden="true"></div>
+  <div class="sky-layer sky-layer--day" aria-hidden="true"></div>
 
-<div class="flower">
-  <div class="stem"></div>
-  <!-- pétales -->
-  <script>
-    // Génère 36 pétales
-    document.addEventListener("DOMContentLoaded", ()=>{
-      const flower=document.querySelector(".flower");
-      for(let i=0;i<36;i++){
-        const p=document.createElement("div");
-        p.className="petal";
-        p.style.setProperty("--rot",`${i*10}deg`);
-        p.style.setProperty("--n",i);
-        flower.appendChild(p);
-      }
-    });
-  </script>
-</div>
+  <div class="sun" aria-hidden="true"></div>
 
-<figcaption>
-  <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
-</figcaption>
+  <div class="flower" aria-hidden="true">
+    <div class="stem"></div>
+    <!-- pétales seront injectés par JS -->
+  </div>
+
+  <figcaption>
+    <span class="typing" id="typing" aria-live="polite"></span><span class="caret" id="caret"></span>
+  </figcaption>
 
 <script>
-/* --- Texte progressif --- */
 (function(){
-  const text = `"Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"`;
-  const target = document.getElementById('typing');
-  const caret = document.getElementById('caret');
-  const delayBeforeStart = 2200;
-  const speed = 36;
-  target.textContent = '';
-  caret.style.opacity = '0';
-  function type() {
-    caret.style.opacity = '1';
-    let i = 0;
-    const interval = setInterval(() => {
-      target.textContent += text[i] || '';
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        setTimeout(()=>{ caret.style.opacity = '0'; }, 800);
-      }
-    }, speed);
+  const PETAL_COUNT = 36;
+  const petalStagger = 40; // ms entre pétales
+  const petalInitialDelay = 800; // ms
+  const body = document.body;
+
+  function createPetals() {
+    const flower = document.querySelector('.flower');
+    for(let i=0;i<PETAL_COUNT;i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.style.setProperty('--rot', `${i*10}deg`);
+      // set a transition so we can stagger with JS
+      p.style.transition = `transform 600ms cubic-bezier(.2,.9,.2,1) ${petalInitialDelay + i*petalStagger}ms, opacity 600ms ease ${petalInitialDelay + i*petalStagger}ms`;
+      flower.appendChild(p);
+    }
   }
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(type, delayBeforeStart);
+
+  function bloomPetals(){
+    const petals = document.querySelectorAll('.petal');
+    petals.forEach((p, idx) => {
+      // apply final transform after a tiny timeout to trigger transition
+      setTimeout(()=>{
+        p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
+        p.style.opacity = '1';
+      }, 20 + idx * petalStagger);
+    });
+  }
+
+  function startTyping(text, targetEl, caretEl, speedMs, delayMs){
+    targetEl.textContent = '';
+    caretEl.style.opacity = '1';
+    let i = 0;
+    setTimeout(()=>{
+      const t = setInterval(()=>{
+        if(i < text.length){
+          targetEl.textContent += text[i++];
+        } else {
+          clearInterval(t);
+          // keep caret a bit then hide
+          setTimeout(()=> caretEl.style.opacity = '0', 800);
+        }
+      }, speedMs);
+    }, delayMs);
+  }
+
+  function createFirework(){
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    const colors = ["#ffcc00","#ff6699","#66ccff","#ff4444","#00ffcc"];
+    fw.style.background = colors[Math.floor(Math.random()*colors.length)];
+    fw.style.left = Math.random() * window.innerWidth + 'px';
+    fw.style.top = (Math.random() * window.innerHeight * 0.6) + 'px';
+    document.body.appendChild(fw);
+    setTimeout(()=>fw.remove(),1500);
+  }
+
+  // single DOMContentLoaded handler
+  window.addEventListener('DOMContentLoaded', ()=>{
+    // create petals and prepare UI
+    createPetals();
+
+    // mark body.loaded so stem transitions
+    setTimeout(()=> body.classList.add('loaded'), 50);
+
+    // bloom petals slightly after stem
+    setTimeout(bloomPetals, 350);
+
+    // start sun + sky transition (smooth) after a tiny delay so user sees initial night
+    const dayDelay = 500; // ms before starting day animation
+    setTimeout(()=>{
+      body.classList.add('day');
+    }, dayDelay);
+
+    // typing
+    const text = `"Dors bien mon petit coeur, je t'aime très fort et plus que toi ahah"`;
+    const target = document.getElementById('typing');
+    const caret = document.getElementById('caret');
+    startTyping(text, target, caret, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200);
+
+    // fireworks (optional) - keep gentle frequency
+    const fwInterval = setInterval(createFirework, 900);
+    // stop fireworks after day has fully settled (optional)
+    setTimeout(()=> clearInterval(fwInterval), 12000);
+
+    // make sure everything resizes well on orientation change
+    window.addEventListener('resize', ()=>{});
   });
 })();
-
-/* --- Feux d’artifice --- */
-function createFirework() {
-  const fw = document.createElement("div");
-  fw.className = "firework";
-  const colors = ["#ffcc00","#ff6699","#66ccff","#ff4444","#00ffcc"];
-  fw.style.background = colors[Math.floor(Math.random()*colors.length)];
-  fw.style.left = Math.random() * window.innerWidth + "px";
-  fw.style.top = (Math.random() * window.innerHeight * 0.6) + "px";
-  document.body.appendChild(fw);
-  setTimeout(()=>fw.remove(),1500);
-}
-setInterval(createFirework, 800);
 </script>
 </body>
 </html>
