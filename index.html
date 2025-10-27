@@ -96,19 +96,6 @@ body.day .sun {
 }
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
 
-/* Feuilles */
-.leaf {
-  position: absolute;
-  width: 80px;
-  height: 40px;
-  background: var(--leaf-color);
-  border-radius: 6px;
-  opacity: 0;
-  transform: scale(0) rotate(0deg);
-  transition: transform 1s ease, opacity 1s ease;
-}
-.leaf.left { left: 50px; bottom: 50px; transform-origin: right center; transform: translateX(-50%) scale(0) rotate(0deg);}
-.leaf.right { right: 50px; bottom: 90px; transform-origin: left center; transform: translateX(-50%) scale(0) rotate(0deg);}
 
 /* Pétales */
 .petal {
@@ -221,17 +208,7 @@ figcaption {
     });
   }
 
-  function animateLeaves() {
-    const leaves = document.querySelectorAll('.leaf');
-    leaves.forEach((leaf, idx)=>{
-      setTimeout(()=>{
-        leaf.style.opacity = '1';
-        leaf.style.transform = leaf.classList.contains('left') 
-          ? 'translateX(-100%) scale(1) rotate(-20deg)' 
-          : 'translateX(100%) scale(1) rotate(20deg)';
-      }, 800 + idx*500);
-    });
-  }
+
 
   function startTyping(text, targetEl, caretEl, speedMs, delayMs){
     targetEl.textContent = '';
