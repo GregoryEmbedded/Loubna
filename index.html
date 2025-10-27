@@ -8,26 +8,28 @@
 :root {
   --petal-bg-start: #ff4b4b;
   --petal-bg-end: #b30000;
+  --leaf-color: #2e7d32;
   --stem-color: #2e7d32;
   --day-duration: 7s;
   --sun-delay: 600ms;
   --sun-duration: 4800ms;
   --type-delay: 2200ms;
-  --type-speed: 36;
+  --type-speed: 24; /* plus lent pour lecture agréable */
 }
 
+/* Reset et body centré */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html,body{height:100%;}
+html, body { height: 100%; width: 100%; }
 body {
   height: 100vh;
   overflow: hidden;
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
-  position: relative;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
+  position: relative;
 }
 
 /* CIEL */
@@ -68,44 +70,65 @@ body.day .sun {
   opacity: 1;
 }
 
-/* FLEUR */
+/* ROSE */
 .flower {
-  width: 200px;
-  height: 340px;
   position: relative;
+  width: 200px;
+  height: 300px;
   z-index: 2;
-  margin-bottom: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 }
+
+/* Tige */
 .stem {
   position: absolute;
-  left: 50%;
   bottom: 0;
   width: 10px;
-  height: 240px;
-  background: linear-gradient(180deg, #3f8a3a, var(--stem-color));
+  height: 150px;
+  background: linear-gradient(180deg, var(--stem-color), #1a5a1a);
   border-radius: 6px;
   transform-origin: bottom center;
   transform: scaleY(0);
   opacity: 0;
-  transition: transform 1s ease-out 0.3s, opacity 1s 0.3s;
+  transition: transform 1s ease-out, opacity 1s;
 }
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
+
+/* Feuilles */
+.leaf {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background: var(--leaf-color);
+  border-radius: 50% 50% 50% 50%;
+  opacity: 0;
+  transform: scale(0) rotate(0deg);
+  transition: transform 1s ease, opacity 1s ease;
+}
+.leaf.left { left: -35px; bottom: 60px; transform-origin: right center; }
+.leaf.right { right: -35px; bottom: 100px; transform-origin: left center; }
+body.loaded .leaf { opacity: 1; transform: scale(1) rotate(15deg); }
+
+/* Pétales */
 .petal {
   position: absolute;
+  width: 60px;
+  height: 80px;
+  border-radius: 50% 50% 50% 50%;
+  background: radial-gradient(circle at 50% 30%, var(--petal-bg-start), var(--petal-bg-end));
+  bottom: 150px;
   left: 50%;
-  bottom: 240px;
-  width: 72px;
-  height: 108px;
-  border-radius: 50% 50% 45% 45%;
-  background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
-  transform-origin: 50% 100%;
+  transform-origin: bottom center;
   transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
   opacity: 0;
+  transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 600ms ease;
 }
 
 /* TEXTE */
 figcaption {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #fffdf4;
   text-align: center;
   text-shadow: 0 0 8px rgba(255,255,255,0.5);
@@ -113,11 +136,13 @@ figcaption {
   max-width: 90%;
   margin-top: 20px;
 }
+
+/* Typing */
 .typing { display: inline-block; white-space: nowrap; overflow: hidden; }
 .caret {
   display: inline-block;
-  width: 10px;
-  height: 1.15em;
+  width: 8px;
+  height: 1em;
   background: #fff;
   animation: blink 900ms steps(2,end) infinite;
   vertical-align: bottom;
@@ -138,7 +163,7 @@ figcaption {
 }
 @keyframes shoot {
   0% { opacity: 1; transform: translate(0,0) rotate(-45deg); }
-  100% { opacity: 0; transform: translate(500px, 500px) rotate(-45deg); }
+  100% { opacity: 0; transform: translate(500px,500px) rotate(-45deg); }
 }
 </style>
 </head>
@@ -149,7 +174,9 @@ figcaption {
 
   <div class="flower">
     <div class="stem"></div>
-    <!-- pétales générés via JS -->
+    <div class="leaf left"></div>
+    <div class="leaf right"></div>
+    <!-- Pétales injectés par JS -->
   </div>
 
   <figcaption>
@@ -158,9 +185,8 @@ figcaption {
 
 <script>
 (function(){
-  const PETAL_COUNT = 36;
-  const petalStagger = 40;
-  const petalInitialDelay = 800;
+  const PETAL_COUNT = 24;
+  const petalStagger = 50;
   const body = document.body;
 
   function createPetals() {
@@ -168,18 +194,17 @@ figcaption {
     for(let i=0;i<PETAL_COUNT;i++){
       const p = document.createElement('div');
       p.className = 'petal';
-      p.style.setProperty('--rot', `${i*10}deg`);
-      p.style.transition = `transform 600ms cubic-bezier(.2,.9,.2,1) ${petalInitialDelay + i*petalStagger}ms, opacity 600ms ease ${petalInitialDelay + i*petalStagger}ms`;
+      p.style.setProperty('--rot', `${i*(360/PETAL_COUNT)}deg`);
+      p.style.transitionDelay = `${i*petalStagger}ms`;
       flower.appendChild(p);
     }
   }
+
   function bloomPetals(){
     const petals = document.querySelectorAll('.petal');
-    petals.forEach((p, idx) => {
-      setTimeout(()=>{
-        p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
-        p.style.opacity = '1';
-      }, 20 + idx * petalStagger);
+    petals.forEach(p=>{
+      p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
+      p.style.opacity = '1';
     });
   }
 
@@ -199,17 +224,6 @@ figcaption {
     }, delayMs);
   }
 
-  function createFirework(){
-    const fw = document.createElement('div');
-    fw.className = 'firework';
-    const colors = ["#ffcc00","#ff6699","#66ccff","#ff4444","#00ffcc"];
-    fw.style.background = colors[Math.floor(Math.random()*colors.length)];
-    fw.style.left = Math.random() * window.innerWidth + 'px';
-    fw.style.top = (Math.random() * window.innerHeight * 0.6) + 'px';
-    document.body.appendChild(fw);
-    setTimeout(()=>fw.remove(),1500);
-  }
-
   function createShootingStar() {
     const star = document.createElement('div');
     star.className = 'shooting-star';
@@ -224,14 +238,13 @@ figcaption {
     createPetals();
     setTimeout(()=> body.classList.add('loaded'), 50);
     setTimeout(bloomPetals, 350);
-
     setTimeout(()=> body.classList.add('day'), 500);
 
-    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très bonne journée mon coeur, fais attention à toi. Je t'aime très fort mon coeur"`;
-    startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 36, 2200);
+    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très belle journée, mon coeur. Je t'aime très fort!"`;
+    startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 24, 1000);
 
-    setInterval(createFirework, 100);
-    setInterval(()=> { if(Math.random() < 0.3) createShootingStar(); }, 100);
+    // Étoiles filantes fréquentes
+    setInterval(()=> { if(Math.random() < 0.5) createShootingStar(); }, 100);
   });
 })();
 </script>
