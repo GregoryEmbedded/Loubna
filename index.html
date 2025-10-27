@@ -102,13 +102,13 @@ body.loaded .stem { transform: scaleY(1); opacity: 1; }
   width: 40px;
   height: 20px;
   background: var(--leaf-color);
-  border-radius: 50% 50% 50% 50%;
+  border-radius: 50%;
   opacity: 0;
   transform: scale(0) rotate(0deg);
   transition: transform 1s ease, opacity 1s ease;
 }
-.leaf.left { left: -35px; bottom: 60px; transform-origin: right center; }
-.leaf.right { right: -35px; bottom: 100px; transform-origin: left center; }
+.leaf.left { left: 50px; bottom: 50px; transform-origin: right center; transform: translateX(-50%) scale(0) rotate(0deg);}
+.leaf.right { right: 50px; bottom: 90px; transform-origin: left center; transform: translateX(-50%) scale(0) rotate(0deg);}
 
 /* Pétales */
 .petal {
@@ -226,7 +226,9 @@ figcaption {
     leaves.forEach((leaf, idx)=>{
       setTimeout(()=>{
         leaf.style.opacity = '1';
-        leaf.style.transform = leaf.classList.contains('left') ? 'scale(1) rotate(-20deg)' : 'scale(1) rotate(20deg)';
+        leaf.style.transform = leaf.classList.contains('left') 
+          ? 'translateX(-100%) scale(1) rotate(-20deg)' 
+          : 'translateX(100%) scale(1) rotate(20deg)';
       }, 800 + idx*500);
     });
   }
