@@ -14,7 +14,7 @@
   --sun-delay: 600ms;
   --sun-duration: 4800ms;
   --type-delay: 2200ms;
-  --type-speed: 24; /* plus lent pour lecture agréable */
+  --type-speed: 24;
 }
 
 /* Reset et body centré */
@@ -109,7 +109,6 @@ body.loaded .stem { transform: scaleY(1); opacity: 1; }
 }
 .leaf.left { left: -35px; bottom: 60px; transform-origin: right center; }
 .leaf.right { right: -35px; bottom: 100px; transform-origin: left center; }
-body.loaded .leaf { opacity: 1; transform: scale(1) rotate(15deg); }
 
 /* Pétales */
 .petal {
@@ -136,8 +135,6 @@ figcaption {
   max-width: 90%;
   margin-top: 20px;
 }
-
-/* Typing */
 .typing { display: inline-block; white-space: nowrap; overflow: hidden; }
 .caret {
   display: inline-block;
@@ -164,6 +161,22 @@ figcaption {
 @keyframes shoot {
   0% { opacity: 1; transform: translate(0,0) rotate(-45deg); }
   100% { opacity: 0; transform: translate(500px,500px) rotate(-45deg); }
+}
+
+/* Pétales qui tombent */
+.falling-petal {
+  position: absolute;
+  width: 60px;
+  height: 80px;
+  border-radius: 50% 50% 50% 50%;
+  background: radial-gradient(circle at 50% 30%, var(--petal-bg-start), var(--petal-bg-end));
+  pointer-events: none;
+  z-index: 2;
+  animation: fall 5s linear forwards;
+}
+@keyframes fall {
+  0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
 }
 </style>
 </head>
@@ -208,6 +221,16 @@ figcaption {
     });
   }
 
+  function animateLeaves() {
+    const leaves = document.querySelectorAll('.leaf');
+    leaves.forEach((leaf, idx)=>{
+      setTimeout(()=>{
+        leaf.style.opacity = '1';
+        leaf.style.transform = leaf.classList.contains('left') ? 'scale(1) rotate(-20deg)' : 'scale(1) rotate(20deg)';
+      }, 800 + idx*500);
+    });
+  }
+
   function startTyping(text, targetEl, caretEl, speedMs, delayMs){
     targetEl.textContent = '';
     caretEl.style.opacity = '1';
@@ -234,17 +257,30 @@ figcaption {
     setTimeout(()=> star.remove(), 1500);
   }
 
+  function createFallingPetal() {
+    const flower = document.querySelector('.flower');
+    const p = document.createElement('div');
+    p.className = 'falling-petal';
+    p.style.left = `${flower.offsetLeft + flower.offsetWidth/2 - 30 + (Math.random()*40-20)}px`;
+    document.body.appendChild(p);
+    setTimeout(()=> p.remove(), 5000);
+  }
+
   window.addEventListener('DOMContentLoaded', ()=>{
     createPetals();
     setTimeout(()=> body.classList.add('loaded'), 50);
     setTimeout(bloomPetals, 350);
     setTimeout(()=> body.classList.add('day'), 500);
+    animateLeaves();
 
     const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très belle journée, mon coeur. Je t'aime très fort!"`;
     startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 24, 1000);
 
     // Étoiles filantes fréquentes
     setInterval(()=> { if(Math.random() < 0.5) createShootingStar(); }, 100);
+
+    // Pétales qui tombent régulièrement
+    setInterval(()=> { if(Math.random() < 0.3) createFallingPetal(); }, 300);
   });
 })();
 </script>
