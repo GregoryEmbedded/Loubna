@@ -9,12 +9,13 @@
   --petal-bg-start: #ff4b4b;
   --petal-bg-end: #b30000;
   --stem-color: #2e7d32;
-  --day-duration: 7s;
+  --day-duration: 7s; /* durée visuelle, utilisée pour timing JS aussi */
   --sun-delay: 600ms;
   --sun-duration: 4800ms;
   --type-delay: 2200ms;
-  --type-speed: 36;
+  --type-speed: 36; /* ms par caractère */
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html,body{height:100%;}
 body {
@@ -27,56 +28,230 @@ body {
   background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
-.sky-layer { position: fixed; inset: 0; z-index: -3; transition: opacity calc(var(--day-duration)) ease-in-out; }
-.sky-layer--night { background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%); opacity: 1; }
-.sky-layer--day { background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%); opacity: 0; }
-body.day .sky-layer--day { opacity: 1; } body.day .sky-layer--night { opacity: 0; }
-.sun { position: fixed; left: 20%; bottom: 0; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%); transform: translateY(220px) scale(0.6); opacity: 0; transition: transform var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay), opacity 1s ease var(--sun-delay); z-index: -2; }
-body.day .sun { transform: translateY(0) scale(1); opacity: 1; }
-.firework { position: fixed; width: 6px; height: 6px; border-radius: 50%; background: transparent; animation: explode 1.5s ease-out forwards; pointer-events: none; z-index: 1; }
-@keyframes explode { 0% { transform: scale(0); opacity: 1; } 80% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
-.flower { width: 200px; height: 340px; position: relative; margin-bottom: 80px; z-index: 2; }
-.stem { position: absolute; left: 50%; bottom: 0; width: 10px; height: 240px; background: linear-gradient(180deg, #3f8a3a, var(--stem-color)); border-radius: 6px; transform-origin: bottom center; transform: scaleY(0); opacity: 0; transition: transform 1s ease-out 0.3s, opacity 1s 0.3s; }
+
+/* Deux couches de ciel superposées : interpolation via opacity (smooth) */
+.sky-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  transition: opacity calc(var(--day-duration)) ease-in-out;
+}
+.sky-layer--night {
+  background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%);
+  opacity: 1;
+}
+.sky-layer--day {
+  background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%);
+  opacity: 0;
+}
+/* when body.day is set, fade the day layer in and night out */
+body.day .sky-layer--day { opacity: 1; }
+body.day .sky-layer--night { opacity: 0; }
+
+/* SOLEIL - animé via transform + transition pour plus de fluidité */
+.sun {
+  position: fixed;
+  left: 20%;
+  bottom: 0; /* point de départ (off-screen via translateY) */
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
+  transform: translateY(220px) scale(0.6);
+  opacity: 0;
+  transition: transform var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay),
+              opacity 1s ease var(--sun-delay);
+  z-index: -2;
+}
+body.day .sun {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* FEUX D’ARTIFICE */
+.firework {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  animation: explode 1.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes explode {
+  0% { transform: scale(0); opacity: 1; }
+  80% { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* FLEUR */
+.flower {
+  width: 200px;
+  height: 340px;
+  position: relative;
+  margin-bottom: 80px;
+  z-index: 2;
+}
+.stem {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 10px;
+  height: 240px;
+  background: linear-gradient(180deg, #3f8a3a, var(--stem-color));
+  border-radius: 6px;
+  transform-origin: bottom center;
+  transform: scaleY(0);
+  opacity: 0;
+  transition: transform 1s ease-out 0.3s, opacity 1s 0.3s;
+}
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
-.petal { position: absolute; left: 50%; bottom: 240px; width: 72px; height: 108px; border-radius: 50% 50% 45% 45%; background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end)); transform-origin: 50% 100%; transform: translateX(-50%) scale(0) rotate(var(--rot,0deg)); opacity: 0; }
-figcaption { font-size: 1.2rem; color: #fffdf4; text-align: center; margin-bottom: 100px; text-shadow: 0 0 8px rgba(255,255,255,0.5); z-index: 3; }
-.typing { display: inline-block; white-space: nowrap; overflow: hidden; }
-.caret { display: inline-block; width: 10px; height: 1.15em; background: #fff; animation: blink 900ms steps(2,end) infinite; vertical-align: bottom; }
+
+.petal {
+  position: absolute;
+  left: 50%;
+  bottom: 240px;
+  width: 72px;
+  height: 108px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 50% 28%, var(--petal-bg-start), var(--petal-bg-end));
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
+  opacity: 0;
+}
+/* we'll animate petals via JS with staggered transitions for precise control */
+
+/* TEXTE */
+figcaption {
+  font-size: 1.2rem;
+  color: #fffdf4;
+  text-align: center;
+  margin-bottom: 100px;
+  text-shadow: 0 0 8px rgba(255,255,255,0.5);
+  z-index: 3;
+}
+.typing {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.caret {
+  display: inline-block;
+  width: 10px;
+  height: 1.15em;
+  background: #fff;
+  animation: blink 900ms steps(2,end) infinite;
+  vertical-align: bottom;
+}
 @keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
-.snow-white { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 180px; background: url('https://i.imgur.com/0JQkT27.png') no-repeat center/contain; z-index: 4; opacity: 0; transition: opacity 2s ease-in-out; }
-body.day .snow-white { opacity: 1; }
-.shooting-star { position: fixed; width: 2px; height: 2px; background: white; border-radius: 50%; box-shadow: 0 0 6px 2px white; pointer-events: none; z-index: 5; opacity: 0; transform: translate(0,0) rotate(45deg); }
+
 </style>
 </head>
 <body>
-<div class="sky-layer sky-layer--night" aria-hidden="true"></div>
-<div class="sky-layer sky-layer--day" aria-hidden="true"></div>
-<div class="sun" aria-hidden="true"></div>
-<div class="flower" aria-hidden="true">
-  <div class="stem"></div>
-</div>
-<div class="snow-white"></div>
-<figcaption>
-  <span class="typing" id="typing" aria-live="polite"></span><span class="caret" id="caret"></span>
-</figcaption>
+  <!-- deux couches de ciel -->
+  <div class="sky-layer sky-layer--night" aria-hidden="true"></div>
+  <div class="sky-layer sky-layer--day" aria-hidden="true"></div>
+
+  <div class="sun" aria-hidden="true"></div>
+
+  <div class="flower" aria-hidden="true">
+    <div class="stem"></div>
+    <!-- pétales seront injectés par JS -->
+  </div>
+
+  <figcaption>
+    <span class="typing" id="typing" aria-live="polite"></span><span class="caret" id="caret"></span>
+  </figcaption>
+
 <script>
 (function(){
-  const PETAL_COUNT = 36, petalStagger = 40, petalInitialDelay = 800, body = document.body;
-  function createPetals() { const flower = document.querySelector('.flower'); for(let i=0;i<PETAL_COUNT;i++){ const p = document.createElement('div'); p.className='petal'; p.style.setProperty('--rot',`${i*10}deg`); p.style.transition=`transform 600ms cubic-bezier(.2,.9,.2,1) ${petalInitialDelay+i*petalStagger}ms, opacity 600ms ease ${petalInitialDelay+i*petalStagger}ms`; flower.appendChild(p);} }
-  function bloomPetals(){ document.querySelectorAll('.petal').forEach((p,idx)=>{ setTimeout(()=>{ p.style.transform=`translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`; p.style.opacity='1'; },20+idx*petalStagger); }); }
-  function startTyping(text,targetEl,caretEl,speedMs,delayMs){ targetEl.textContent=''; caretEl.style.opacity='1'; let i=0; setTimeout(()=>{ const t=setInterval(()=>{ if(i<text.length){ targetEl.textContent+=text[i++]; } else { clearInterval(t); setTimeout(()=>caretEl.style.opacity='0',800); } }, speedMs); },delayMs); }
-  function createFirework(){ const fw=document.createElement('div'); fw.className='firework'; const colors=['#ffcc00','#ff6699','#66ccff','#ff4444','#00ffcc']; fw.style.background=colors[Math.floor(Math.random()*colors.length)]; fw.style.left=Math.random()*window.innerWidth+'px'; fw.style.top=(Math.random()*window.innerHeight*0.6)+'px'; document.body.appendChild(fw); setTimeout(()=>fw.remove(),1500); }
-  function shootingStar(){ const s=document.createElement('div'); s.className='shooting-star'; s.style.left=Math.random()*window.innerWidth+'px'; s.style.top=Math.random()*window.innerHeight*0.4+'px'; document.body.appendChild(s); requestAnimationFrame(()=>{ s.style.transform='translate(500px,500px) rotate(45deg)'; s.style.opacity='1'; }); setTimeout(()=>s.remove(),1500); }
-  window.addEventListener('DOMContentLoaded',()=>{
+  const PETAL_COUNT = 36;
+  const petalStagger = 40; // ms entre pétales
+  const petalInitialDelay = 800; // ms
+  const body = document.body;
+
+  function createPetals() {
+    const flower = document.querySelector('.flower');
+    for(let i=0;i<PETAL_COUNT;i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.style.setProperty('--rot', `${i*10}deg`);
+      // set a transition so we can stagger with JS
+      p.style.transition = `transform 600ms cubic-bezier(.2,.9,.2,1) ${petalInitialDelay + i*petalStagger}ms, opacity 600ms ease ${petalInitialDelay + i*petalStagger}ms`;
+      flower.appendChild(p);
+    }
+  }
+
+  function bloomPetals(){
+    const petals = document.querySelectorAll('.petal');
+    petals.forEach((p, idx) => {
+      // apply final transform after a tiny timeout to trigger transition
+      setTimeout(()=>{
+        p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
+        p.style.opacity = '1';
+      }, 20 + idx * petalStagger);
+    });
+  }
+
+  function startTyping(text, targetEl, caretEl, speedMs, delayMs){
+    targetEl.textContent = '';
+    caretEl.style.opacity = '1';
+    let i = 0;
+    setTimeout(()=>{
+      const t = setInterval(()=>{
+        if(i < text.length){
+          targetEl.textContent += text[i++];
+        } else {
+          clearInterval(t);
+          // keep caret a bit then hide
+          setTimeout(()=> caretEl.style.opacity = '0', 800);
+        }
+      }, speedMs);
+    }, delayMs);
+  }
+
+  function createFirework(){
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    const colors = ["#ffcc00","#ff6699","#66ccff","#ff4444","#00ffcc"];
+    fw.style.background = colors[Math.floor(Math.random()*colors.length)];
+    fw.style.left = Math.random() * window.innerWidth + 'px';
+    fw.style.top = (Math.random() * window.innerHeight * 0.6) + 'px';
+    document.body.appendChild(fw);
+    setTimeout(()=>fw.remove(),1500);
+  }
+
+  // single DOMContentLoaded handler
+  window.addEventListener('DOMContentLoaded', ()=>{
+    // create petals and prepare UI
     createPetals();
-    setTimeout(()=>body.classList.add('loaded'),50);
-    setTimeout(bloomPetals,350);
-    setTimeout(()=>{ body.classList.add('day'); },500);
-    const text=`"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très bonne journée mon coeur, fais attention à toi. Je t'aime très fort mon coeur"`;
-    startTyping(text,document.getElementById('typing'),document.getElementById('caret'),36,2200);
-    const fwInterval=setInterval(createFirework,900);
-    setTimeout(()=>clearInterval(fwInterval),12000);
-    setInterval(shootingStar,2000);
+
+    // mark body.loaded so stem transitions
+    setTimeout(()=> body.classList.add('loaded'), 50);
+
+    // bloom petals slightly after stem
+    setTimeout(bloomPetals, 350);
+
+    // start sun + sky transition (smooth) after a tiny delay so user sees initial night
+    const dayDelay = 500; // ms before starting day animation
+    setTimeout(()=>{
+      body.classList.add('day');
+    }, dayDelay);
+
+    // typing
+    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très bonne journée mon coeur, fais attention à toi. Je t'aime très fort mon coeur"`;
+    const target = document.getElementById('typing');
+    const caret = document.getElementById('caret');
+    startTyping(text, target, caret, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200);
+
+    // fireworks (optional) - keep gentle frequency
+    const fwInterval = setInterval(createFirework, 100);
+    // stop fireworks after day has fully settled (optional)
+    setTimeout(()=> clearInterval(fwInterval), 12000);
+
+    // make sure everything resizes well on orientation change
+    window.addEventListener('resize', ()=>{});
   });
 })();
 </script>
