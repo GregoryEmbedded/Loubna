@@ -10,10 +10,6 @@
   --petal-bg-end: #b30000;
   --leaf-color: #2e7d32;
   --stem-color: #2e7d32;
-  --day-duration: 7s;
-  --sun-delay: 600ms;
-  --sun-duration: 4800ms;
-  --type-delay: 2200ms;
   --type-speed: 24;
 }
 
@@ -32,59 +28,19 @@ body {
   position: relative;
 }
 
-/* CIEL */
-.sky-layer {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  transition: opacity calc(var(--day-duration)) ease-in-out;
-}
-.sky-layer--night {
-  background: linear-gradient(180deg, #020617 0%, #081325 50%, #0b2545 100%);
-  opacity: 1;
-}
-.sky-layer--day {
-  background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%);
-  opacity: 0;
-}
-body.day .sky-layer--day { opacity: 1; }
-body.day .sky-layer--night { opacity: 0; }
-
-/* SOLEIL */
-.sun {
-  position: fixed;
-  left: 20%;
-  bottom: 0;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff9d6 0%, #ffe08a 30%, #ffb347 65%, #ff8c2a 100%);
-  transform: translateY(220px) scale(0.6);
-  opacity: 0;
-  transition: transform var(--sun-duration) cubic-bezier(.2,.9,.2,1) var(--sun-delay),
-              opacity 1s ease var(--sun-delay);
-  z-index: -2;
-}
-body.day .sun {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-
-/* ROSE */
+/* Tige */
 .flower {
   position: relative;
   width: 200px;
   height: 300px;
-  z-index: 2;
   display: flex;
   justify-content: center;
   align-items: flex-end;
 }
-
-/* Tige */
 .stem {
   position: absolute;
   bottom: 0;
+  left: 50%;
   width: 10px;
   height: 150px;
   background: linear-gradient(180deg, var(--stem-color), #1a5a1a);
@@ -96,19 +52,29 @@ body.day .sun {
 }
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
 
-/* Feuilles */
+/* Feuilles alignées sur la tige */
 .leaf {
   position: absolute;
   width: 40px;
   height: 20px;
   background: var(--leaf-color);
-  border-radius: 50% 50% 50% 50%;
+  border-radius: 50%;
   opacity: 0;
-  transform: scale(0) rotate(0deg);
+  transform: scale(0);
   transition: transform 1s ease, opacity 1s ease;
 }
-.leaf.left { left: -35px; bottom: 60px; transform-origin: right center; }
-.leaf.right { right: -35px; bottom: 100px; transform-origin: left center; }
+.leaf.left {
+  left: 50%;
+  bottom: 50px;
+  transform-origin: right center;
+  transform: translateX(-50%) scale(0);
+}
+.leaf.right {
+  left: 50%;
+  bottom: 90px;
+  transform-origin: left center;
+  transform: translateX(-50%) scale(0);
+}
 
 /* Pétales */
 .petal {
@@ -125,9 +91,9 @@ body.loaded .stem { transform: scaleY(1); opacity: 1; }
   transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 600ms ease;
 }
 
-/* TEXTE */
+/* Texte centré */
 figcaption {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #fffdf4;
   text-align: center;
   text-shadow: 0 0 8px rgba(255,255,255,0.5);
@@ -146,7 +112,7 @@ figcaption {
 }
 @keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
 
-/* ÉTOILES FILANTES */
+/* Étoiles filantes */
 .shooting-star {
   position: fixed;
   width: 2px;
@@ -168,7 +134,7 @@ figcaption {
   position: absolute;
   width: 60px;
   height: 80px;
-  border-radius: 50% 50% 50% 50%;
+  border-radius: 50%;
   background: radial-gradient(circle at 50% 30%, var(--petal-bg-start), var(--petal-bg-end));
   pointer-events: none;
   z-index: 2;
@@ -181,15 +147,11 @@ figcaption {
 </style>
 </head>
 <body>
-  <div class="sky-layer sky-layer--night"></div>
-  <div class="sky-layer sky-layer--day"></div>
-  <div class="sun"></div>
-
   <div class="flower">
     <div class="stem"></div>
     <div class="leaf left"></div>
     <div class="leaf right"></div>
-    <!-- Pétales injectés par JS -->
+    <!-- pétales générés par JS -->
   </div>
 
   <figcaption>
@@ -226,7 +188,7 @@ figcaption {
     leaves.forEach((leaf, idx)=>{
       setTimeout(()=>{
         leaf.style.opacity = '1';
-        leaf.style.transform = leaf.classList.contains('left') ? 'scale(1) rotate(-20deg)' : 'scale(1) rotate(20deg)';
+        leaf.style.transform = leaf.classList.contains('left') ? 'translateX(-25px) scale(1) rotate(-20deg)' : 'translateX(25px) scale(1) rotate(20deg)';
       }, 800 + idx*500);
     });
   }
@@ -270,16 +232,15 @@ figcaption {
     createPetals();
     setTimeout(()=> body.classList.add('loaded'), 50);
     setTimeout(bloomPetals, 350);
-    setTimeout(()=> body.classList.add('day'), 500);
     animateLeaves();
 
-    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très belle journée, mon coeur. Je t'aime très fort!"`;
+    const text = `"Bonjour ma princesse, je t'aime ❤️!"`;
     startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 24, 1000);
 
-    // Étoiles filantes fréquentes
+    // Étoiles filantes
     setInterval(()=> { if(Math.random() < 0.5) createShootingStar(); }, 100);
 
-    // Pétales qui tombent régulièrement
+    // Pétales qui tombent
     setInterval(()=> { if(Math.random() < 0.3) createFallingPetal(); }, 300);
   });
 })();
