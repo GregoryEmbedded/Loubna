@@ -96,6 +96,19 @@ body.day .sun {
 }
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
 
+/* Feuilles */
+.leaf {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background: var(--leaf-color);
+  border-radius: 50% 50% 50% 50%;
+  opacity: 0;
+  transform: scale(0) rotate(0deg);
+  transition: transform 1s ease, opacity 1s ease;
+}
+.leaf.left { left: -35px; bottom: 60px; transform-origin: right center; }
+.leaf.right { right: -35px; bottom: 100px; transform-origin: left center; }
 
 /* Pétales */
 .petal {
@@ -208,7 +221,15 @@ figcaption {
     });
   }
 
-
+  function animateLeaves() {
+    const leaves = document.querySelectorAll('.leaf');
+    leaves.forEach((leaf, idx)=>{
+      setTimeout(()=>{
+        leaf.style.opacity = '1';
+        leaf.style.transform = leaf.classList.contains('left') ? 'scale(1) rotate(-20deg)' : 'scale(1) rotate(20deg)';
+      }, 800 + idx*500);
+    });
+  }
 
   function startTyping(text, targetEl, caretEl, speedMs, delayMs){
     targetEl.textContent = '';
@@ -252,7 +273,7 @@ figcaption {
     setTimeout(()=> body.classList.add('day'), 500);
     animateLeaves();
 
-    const text = `"❤️❤️❤️Bonjour ma princesse, je t'aime ❤️❤️❤️"`;
+    const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très belle journée, mon coeur. Je t'aime très fort!"`;
     startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 24, 1000);
 
     // Étoiles filantes fréquentes
