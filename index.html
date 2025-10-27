@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Je t’aime — lever du soleil</title>
+<title>Bonjour ma princesse</title>
 <style>
 :root {
   --petal-bg-start: #ff4b4b;
   --petal-bg-end: #b30000;
   --stem-color: #2e7d32;
-  --day-duration: 7s; /* durée visuelle, utilisée pour timing JS aussi */
+  --day-duration: 7s;
   --sun-delay: 600ms;
   --sun-duration: 4800ms;
   --type-delay: 2200ms;
-  --type-speed: 36; /* ms par caractère */
+  --type-speed: 36;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,15 +21,12 @@ html,body{height:100%;}
 body {
   height: 100vh;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
+  position: relative;
 }
 
-/* Deux couches de ciel superposées : interpolation via opacity (smooth) */
+/* CIEL */
 .sky-layer {
   position: fixed;
   inset: 0;
@@ -44,15 +41,14 @@ body {
   background: linear-gradient(180deg, #ffdd9b 0%, #ff7b54 40%, #87ceeb 100%);
   opacity: 0;
 }
-/* when body.day is set, fade the day layer in and night out */
 body.day .sky-layer--day { opacity: 1; }
 body.day .sky-layer--night { opacity: 0; }
 
-/* SOLEIL - animé via transform + transition pour plus de fluidité */
+/* SOLEIL */
 .sun {
   position: fixed;
   left: 20%;
-  bottom: 0; /* point de départ (off-screen via translateY) */
+  bottom: 0;
   width: 160px;
   height: 160px;
   border-radius: 50%;
@@ -66,23 +62,6 @@ body.day .sky-layer--night { opacity: 0; }
 body.day .sun {
   transform: translateY(0) scale(1);
   opacity: 1;
-}
-
-/* FEUX D’ARTIFICE */
-.firework {
-  position: fixed;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: transparent;
-  animation: explode 1.5s ease-out forwards;
-  pointer-events: none;
-  z-index: 1;
-}
-@keyframes explode {
-  0% { transform: scale(0); opacity: 1; }
-  80% { transform: scale(1.4); opacity: 1; }
-  100% { transform: scale(1.8); opacity: 0; }
 }
 
 /* FLEUR */
@@ -107,7 +86,6 @@ body.day .sun {
   transition: transform 1s ease-out 0.3s, opacity 1s 0.3s;
 }
 body.loaded .stem { transform: scaleY(1); opacity: 1; }
-
 .petal {
   position: absolute;
   left: 50%;
@@ -120,22 +98,34 @@ body.loaded .stem { transform: scaleY(1); opacity: 1; }
   transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
   opacity: 0;
 }
-/* we'll animate petals via JS with staggered transitions for precise control */
+
+/* BLANCHE-NEIGE */
+.snow-white {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 2s ease 3s;
+}
+body.day .snow-white { opacity: 1; }
 
 /* TEXTE */
 figcaption {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 1.2rem;
   color: #fffdf4;
   text-align: center;
-  margin-bottom: 100px;
   text-shadow: 0 0 8px rgba(255,255,255,0.5);
-  z-index: 3;
+  z-index: 5;
+  max-width: 90%;
 }
-.typing {
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-}
+.typing { display: inline-block; white-space: nowrap; overflow: hidden; }
 .caret {
   display: inline-block;
   width: 10px;
@@ -146,29 +136,45 @@ figcaption {
 }
 @keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
 
+/* ÉTOILES FILANTES */
+.shooting-star {
+  position: fixed;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(45deg, #fff, rgba(255,255,255,0));
+  opacity: 0;
+  transform: rotate(-45deg);
+  pointer-events: none;
+  z-index: 4;
+  animation: shoot 1s linear forwards;
+}
+@keyframes shoot {
+  0% { opacity: 1; transform: translate(0,0) rotate(-45deg); }
+  100% { opacity: 0; transform: translate(500px, 500px) rotate(-45deg); }
+}
 </style>
 </head>
 <body>
-  <!-- deux couches de ciel -->
-  <div class="sky-layer sky-layer--night" aria-hidden="true"></div>
-  <div class="sky-layer sky-layer--day" aria-hidden="true"></div>
+  <div class="sky-layer sky-layer--night"></div>
+  <div class="sky-layer sky-layer--day"></div>
+  <div class="sun"></div>
 
-  <div class="sun" aria-hidden="true"></div>
-
-  <div class="flower" aria-hidden="true">
+  <div class="flower">
     <div class="stem"></div>
-    <!-- pétales seront injectés par JS -->
+    <!-- pétales générés via JS -->
   </div>
 
+  <img class="snow-white" src="https://i.imgur.com/4Gf7F8J.png" alt="Blanche-Neige">
+
   <figcaption>
-    <span class="typing" id="typing" aria-live="polite"></span><span class="caret" id="caret"></span>
+    <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
   </figcaption>
 
 <script>
 (function(){
   const PETAL_COUNT = 36;
-  const petalStagger = 40; // ms entre pétales
-  const petalInitialDelay = 800; // ms
+  const petalStagger = 40;
+  const petalInitialDelay = 800;
   const body = document.body;
 
   function createPetals() {
@@ -177,16 +183,13 @@ figcaption {
       const p = document.createElement('div');
       p.className = 'petal';
       p.style.setProperty('--rot', `${i*10}deg`);
-      // set a transition so we can stagger with JS
       p.style.transition = `transform 600ms cubic-bezier(.2,.9,.2,1) ${petalInitialDelay + i*petalStagger}ms, opacity 600ms ease ${petalInitialDelay + i*petalStagger}ms`;
       flower.appendChild(p);
     }
   }
-
   function bloomPetals(){
     const petals = document.querySelectorAll('.petal');
     petals.forEach((p, idx) => {
-      // apply final transform after a tiny timeout to trigger transition
       setTimeout(()=>{
         p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
         p.style.opacity = '1';
@@ -204,7 +207,6 @@ figcaption {
           targetEl.textContent += text[i++];
         } else {
           clearInterval(t);
-          // keep caret a bit then hide
           setTimeout(()=> caretEl.style.opacity = '0', 800);
         }
       }, speedMs);
@@ -222,36 +224,33 @@ figcaption {
     setTimeout(()=>fw.remove(),1500);
   }
 
-  // single DOMContentLoaded handler
+  function createShootingStar() {
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    star.style.left = Math.random() * window.innerWidth + 'px';
+    star.style.top = Math.random() * window.innerHeight * 0.5 + 'px';
+    star.style.animationDuration = 0.8 + Math.random() * 0.7 + 's';
+    document.body.appendChild(star);
+    setTimeout(()=> star.remove(), 1500);
+  }
+
   window.addEventListener('DOMContentLoaded', ()=>{
-    // create petals and prepare UI
     createPetals();
-
-    // mark body.loaded so stem transitions
     setTimeout(()=> body.classList.add('loaded'), 50);
-
-    // bloom petals slightly after stem
     setTimeout(bloomPetals, 350);
 
-    // start sun + sky transition (smooth) after a tiny delay so user sees initial night
-    const dayDelay = 500; // ms before starting day animation
-    setTimeout(()=>{
-      body.classList.add('day');
-    }, dayDelay);
+    setTimeout(()=> body.classList.add('day'), 500);
 
-    // typing
     const text = `"Bonjour ma princesse, tu as passé une bonne nuit mon amour? Je te souhaite une très bonne journée mon coeur, fais attention à toi. Je t'aime très fort mon coeur"`;
-    const target = document.getElementById('typing');
-    const caret = document.getElementById('caret');
-    startTyping(text, target, caret, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-speed')) || 36, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--type-delay')) || 2200);
+    startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 36, 2200);
 
-    // fireworks (optional) - keep gentle frequency
-    const fwInterval = setInterval(createFirework, 100);
-    // stop fireworks after day has fully settled (optional)
-    setTimeout(()=> clearInterval(fwInterval), 12000);
+    // feux d'artifice
+    setInterval(createFirework, 100);
 
-    // make sure everything resizes well on orientation change
-    window.addEventListener('resize', ()=>{});
+    // étoiles filantes continues
+    setInterval(()=> {
+      if(Math.random() < 0.3) createShootingStar();
+    }, 100);
   });
 })();
 </script>
