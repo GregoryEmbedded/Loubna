@@ -1,249 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Bonjour ma princesse</title>
-<style>
-:root {
-  --petal-bg-start: #ff4b4b;
-  --petal-bg-end: #b30000;
-  --leaf-color: #2e7d32;
-  --stem-color: #2e7d32;
-  --type-speed: 24;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scène — Cadeau de Gregos</title>
+  <style>
+    :root{--bg:#0f1724;--card:#ffffff;--glass:rgba(255,255,255,0.06)}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    body{background:linear-gradient(180deg,#071029 0%, #0f1724 60%);display:flex;align-items:center;justify-content:center;color:#fff}
 
-/* Reset et body centré */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; width: 100%; }
-body {
-  height: 100vh;
-  overflow: hidden;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background: radial-gradient(circle at bottom, #020617 0%, #0b2545 80%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
+    /* scène container */
+    .scene{position:relative;width:100%;height:100vh;overflow:hidden}
 
-/* Tige */
-.flower {
-  position: relative;
-  width: 200px;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-.stem {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 10px;
-  height: 150px;
-  background: linear-gradient(180deg, var(--stem-color), #1a5a1a);
-  border-radius: 6px;
-  transform-origin: bottom center;
-  transform: scaleY(0);
-  opacity: 0;
-  transition: transform 1s ease-out, opacity 1s;
-}
-body.loaded .stem { transform: scaleY(1); opacity: 1; }
+    /* couche décorative (étoiles / particules simples) */
+    .bg-decor{position:absolute;inset:0;pointer-events:none;opacity:.25}
 
-/* Feuilles alignées sur la tige */
-.leaf {
-  position: absolute;
-  width: 60px;
-  height: 30px;
-  background: var(--leaf-color);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0);
-  transition: transform 1s ease, opacity 1s ease;
-}
-.leaf.left {
-  left: 40%;
-  bottom: 50px;
-  transform-origin: right center;
-  transform: translateX(-50%) scale(0);
-}
-.leaf.right {
-  left: 40%;
-  bottom: 50px;
-  transform-origin: left center;
-  transform: translateX(-50%) scale(0);
-}
+    /* boîte centrale qui contient le PDF */
+    .viewer{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);width:min(1100px,92vw);height:min(780px,86vh);backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:14px;box-shadow:0 10px 40px rgba(2,6,23,.6);overflow:hidden;display:flex;flex-direction:column;opacity:0;transition:opacity .9s ease, transform .9s cubic-bezier(.2,.9,.2,1)}
 
-/* Pétales */
-.petal {
-  position: absolute;
-  width: 60px;
-  height: 80px;
-  border-radius: 50% 50% 50% 50%;
-  background: radial-gradient(circle at 50% 30%, var(--petal-bg-start), var(--petal-bg-end));
-  bottom: 150px;
-  left: 50%;
-  transform-origin: bottom center;
-  transform: translateX(-50%) scale(0) rotate(var(--rot,0deg));
-  opacity: 0;
-  transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 600ms ease;
-}
+    .viewer.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 
-/* Texte centré */
-figcaption {
-  font-size: 0.9rem;
-  color: #fffdf4;
-  text-align: center;
-  text-shadow: 0 0 8px rgba(255,255,255,0.5);
-  z-index: 5;
-  max-width: 90%;
-  margin-top: 20px;
-}
-.typing { display: inline-block; white-space: nowrap; overflow: hidden; }
-.caret {
-  display: inline-block;
-  width: 8px;
-  height: 1em;
-  background: #fff;
-  animation: blink 900ms steps(2,end) infinite;
-  vertical-align: bottom;
-}
-@keyframes blink { 0%,50% {opacity:1} 51%,100% {opacity:0} }
+    /* entête de la carte */
+    .viewer .header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .logo{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;color:#0b1020;font-weight:700}
+    .title{font-weight:600}
+    .controls{margin-left:auto;display:flex;gap:8px}
+    .btn{background:var(--glass);border:none;padding:8px 10px;border-radius:8px;color:inherit;cursor:pointer}
 
-/* Étoiles filantes */
-.shooting-star {
-  position: fixed;
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(45deg, #fff, rgba(255,255,255,0));
-  opacity: 0;
-  transform: rotate(-45deg);
-  pointer-events: none;
-  z-index: 4;
-  animation: shoot 1s linear forwards;
-}
-@keyframes shoot {
-  0% { opacity: 1; transform: translate(0,0) rotate(-45deg); }
-  100% { opacity: 0; transform: translate(500px,500px) rotate(-45deg); }
-}
+    /* zone PDF */
+    .pdf-wrap{flex:1;background:#f6f7f9}
+    .pdf-wrap iframe{width:100%;height:100%;border:0;display:block}
 
-/* Pétales qui tombent */
-.falling-petal {
-  position: absolute;
-  width: 60px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, var(--petal-bg-start), var(--petal-bg-end));
-  pointer-events: none;
-  z-index: 2;
-  animation: fall 5s linear forwards;
-}
-@keyframes fall {
-  0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
-}
-</style>
+    /* fallback message */
+    .fallback{padding:18px;font-size:14px;color:#0b1020;background:#fff;text-align:center}
+
+    /* auto-open message */
+    .intro{position:absolute;left:50%;top:12vh;transform:translateX(-50%);background:rgba(255,255,255,0.04);padding:10px 16px;border-radius:999px;font-weight:600;backdrop-filter:blur(4px)}
+
+    @media (max-width:600px){.viewer{height:92vh;border-radius:12px}}
+  </style>
 </head>
 <body>
-  <div class="flower">
-    <div class="stem"></div>
-    <div class="leaf left"></div>
-    <div class="leaf right"></div>
-    <!-- pétales générés par JS -->
+  <div class="scene">
+    <div class="bg-decor" aria-hidden>
+      <!-- petites étoiles animées (pure CSS simple) -->
+      <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="none" style="display:block">
+        <circle cx="80" cy="60" r="1.6" fill="white" opacity="0.6"/>
+        <circle cx="400" cy="180" r="1.8" fill="white" opacity="0.45"/>
+        <circle cx="980" cy="40" r="1.7" fill="white" opacity="0.35"/>
+        <circle cx="110" cy="480" r="1.5" fill="white" opacity="0.3"/>
+        <circle cx="820" cy="360" r="1.3" fill="white" opacity="0.25"/>
+      </svg>
+    </div>
+
+    <div class="intro">Ouverture du cadeau…</div>
+
+    <div id="viewer" class="viewer" role="region" aria-label="Document cadeau de Gregos">
+      <div class="header">
+        <div class="logo">GG</div>
+        <div class="title">Cadeau de Gregos — Aperçu</div>
+        <div class="controls">
+          <button id="closeBtn" class="btn" title="Fermer">✕</button>
+          <button id="downloadBtn" class="btn" title="Télécharger">⬇</button>
+        </div>
+      </div>
+      <div class="pdf-wrap" id="pdfWrap">
+        <!-- L'iframe sera remplie par JavaScript pour permettre l'animation d'apparition -->
+        <iframe id="pdfFrame" src="about:blank" aria-label="PDF: cadeau de gregos"></iframe>
+      </div>
+    </div>
+
   </div>
 
-  <figcaption>
-    <span class="typing" id="typing"></span><span class="caret" id="caret"></span>
-  </figcaption>
+  <script>
+    // Nom du fichier PDF — si le nom contient des espaces, encodez-le comme ci-dessous ou mettez le chemin correct.
+    const pdfFile = encodeURI('cadeau de gregos.pdf');
+    // Si votre PDF est dans un sous-dossier, par exemple 'assets/cadeau_de_gregos.pdf', remplacez pdfFile par ce chemin.
 
-<script>
-(function(){
-  const PETAL_COUNT = 24;
-  const petalStagger = 50;
-  const body = document.body;
+    const viewer = document.getElementById('viewer');
+    const frame = document.getElementById('pdfFrame');
+    const closeBtn = document.getElementById('closeBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-  function createPetals() {
-    const flower = document.querySelector('.flower');
-    for(let i=0;i<PETAL_COUNT;i++){
-      const p = document.createElement('div');
-      p.className = 'petal';
-      p.style.setProperty('--rot', `${i*(360/PETAL_COUNT)}deg`);
-      p.style.transitionDelay = `${i*petalStagger}ms`;
-      flower.appendChild(p);
-    }
-  }
-
-  function bloomPetals(){
-    const petals = document.querySelectorAll('.petal');
-    petals.forEach(p=>{
-      p.style.transform = `translateX(-50%) scale(1) rotate(${p.style.getPropertyValue('--rot')})`;
-      p.style.opacity = '1';
-    });
-  }
-
-  function animateLeaves() {
-    const leaves = document.querySelectorAll('.leaf');
-    leaves.forEach((leaf, idx)=>{
+    // comportement: ouvrir automatiquement avec une animation
+    window.addEventListener('DOMContentLoaded', ()=>{
+      // petite temporisation pour laisser voir le message "Ouverture du cadeau..."
       setTimeout(()=>{
-        leaf.style.opacity = '1';
-        leaf.style.transform = leaf.classList.contains('left') ? 'translateX(-25px) scale(1) rotate(-20deg)' : 'translateX(25px) scale(1) rotate(20deg)';
-      }, 800 + idx*500);
+        // injecte l'iframe. Utilise l'usage natif du navigateur pour afficher le PDF.
+        frame.src = pdfFile;
+        // montre la carte avec transition
+        requestAnimationFrame(()=> viewer.classList.add('show'));
+      }, 600);
     });
-  }
 
-  function startTyping(text, targetEl, caretEl, speedMs, delayMs){
-    targetEl.textContent = '';
-    caretEl.style.opacity = '1';
-    let i = 0;
-    setTimeout(()=>{
-      const t = setInterval(()=>{
-        if(i < text.length){
-          targetEl.textContent += text[i++];
-        } else {
-          clearInterval(t);
-          setTimeout(()=> caretEl.style.opacity = '0', 800);
-        }
-      }, speedMs);
-    }, delayMs);
-  }
+    // fermer la vue (retire la carte)
+    closeBtn.addEventListener('click', ()=>{
+      viewer.classList.remove('show');
+      // libère la ressource
+      setTimeout(()=> frame.src = 'about:blank', 600);
+    });
 
-  function createShootingStar() {
-    const star = document.createElement('div');
-    star.className = 'shooting-star';
-    star.style.left = Math.random() * window.innerWidth + 'px';
-    star.style.top = Math.random() * window.innerHeight * 0.5 + 'px';
-    star.style.animationDuration = 0.8 + Math.random() * 0.7 + 's';
-    document.body.appendChild(star);
-    setTimeout(()=> star.remove(), 1500);
-  }
+    // téléchargement direct
+    downloadBtn.addEventListener('click', ()=>{
+      const a = document.createElement('a');
+      a.href = pdfFile;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
 
-  function createFallingPetal() {
-    const flower = document.querySelector('.flower');
-    const p = document.createElement('div');
-    p.className = 'falling-petal';
-    p.style.left = `${flower.offsetLeft + flower.offsetWidth/2 - 30 + (Math.random()*40-20)}px`;
-    document.body.appendChild(p);
-    setTimeout(()=> p.remove(), 5000);
-  }
+    // accessibilité: fermer avec Escape
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        viewer.classList.remove('show');
+        setTimeout(()=> frame.src = 'about:blank', 600);
+      }
+    });
+  </script>
 
-  window.addEventListener('DOMContentLoaded', ()=>{
-    createPetals();
-    setTimeout(()=> body.classList.add('loaded'), 50);
-    setTimeout(bloomPetals, 350);
-    animateLeaves();
-
-    const text = `"Bonjour ma princesse, je t'aime ❤️!"`;
-    startTyping(text, document.getElementById('typing'), document.getElementById('caret'), 24, 1000);
-
-    // Étoiles filantes
-    setInterval(()=> { if(Math.random() < 0.5) createShootingStar(); }, 100);
-
-    // Pétales qui tombent
-    setInterval(()=> { if(Math.random() < 0.3) createFallingPetal(); }, 300);
-  });
-})();
-</script>
+  <!-- Fallback: si le navigateur ne supporte pas l'affichage dans l'iframe, l'utilisateur verra un lien pour télécharger le PDF -->
+  <noscript>
+    <div class="fallback">Veuillez activer JavaScript pour afficher le document. <a href="cadeau%20de%20gregos.pdf" download>Télécharger le PDF</a></div>
+  </noscript>
 </body>
 </html>
