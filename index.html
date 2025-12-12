@@ -21,12 +21,13 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 3rem;
-      color: rgba(255,255,255,0.07);
+      font-size: 3.2rem;
+      color: rgba(255,255,255,0.18); /* texte plus visible */
       text-align: center;
-      width: 90%;
-      line-height: 1.2;
+      width: 95%;
+      line-height: 1.25;
       z-index: 0;
+      font-weight: 600;
       user-select: none;
     }
 
@@ -42,7 +43,10 @@
     }
 
     @keyframes float {
-      from { transform: translateY(20px); }
+      0%   { transform: translateY(35px) scale(0.95); }
+      50%  { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-15px) scale(1.03); }
+    }
       to   { transform: translateY(-10px); }
     }
 
