@@ -1,224 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bonjour mon amour</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg1: #0f1022;
-      --bg2: #1b254b;
-      --accent1: #ff8fb1; /* rose */
-      --accent2: #ffd07a; /* jaune */
-      --soft: rgba(255,255,255,0.06);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
-    body{
-      background: linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 60%);
-      overflow:hidden;
-      display:flex;align-items:center;justify-content:center;padding:3rem;
-      color:white;
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(#1a2340, #fcb1b1);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
     }
 
-    /* Big background message */
-    .bg-message{
-      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(28px, 6vw, 92px);
+    .bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
       color: rgba(255,255,255,0.07);
-      transform: translateY(-10%);
-      text-align:center; padding: 2rem;
-      line-height:0.95;
+      text-align: center;
+      width: 90%;
+      line-height: 1.2;
+      z-index: 0;
+      user-select: none;
     }
 
-    .stage{
-      position:relative;z-index:2;width:min(1000px,95vw);height:min(700px,75vh);
-      display:grid;place-items:center;
+    .sun-container {
+      position: relative;
+      width: 350px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      animation: float 4s ease-in-out infinite alternate;
     }
 
-    /* Horizon ground */
-    .horizon{
-      position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(0deg,#07102a 0%, rgba(7,16,42,0.6) 50%, transparent 100%);border-top-left-radius:40px;border-top-right-radius:40px;z-index:1;filter:blur(6px) saturate(120%);
+    @keyframes float {
+      from { transform: translateY(20px); }
+      to   { transform: translateY(-10px); }
     }
 
-    /* Heart sun container */
-    .sun-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:420px;height:420px;}
-
-    /* Floating animation */
-    .sun-wrap{animation:rise 8s ease-in-out infinite alternate;}
-    @keyframes rise{
-      from{transform:translateY(30px) scale(0.98)}
-      to{transform:translateY(-10px) scale(1.02)}
+    /* Heart sunrise */
+    .heart-sun {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #ffd27f, #ff9bd4);
+      clip-path: path("M150 30 C190 -20, 280 20, 280 110 C280 200, 200 240, 150 300 C100 240, 20 200, 20 110 C20 20, 110 -20, 150 30 Z");
+      filter: drop-shadow(0 0 25px rgba(255,180,180,0.9));
     }
 
-    /* Glow and rays */
-    .rays{
-      position:absolute;inset:0;pointer-events:none;z-index:0;filter:blur(12px) opacity(.9);
-      transform:scale(1.25);
+    /* Horizon */
+    .horizon {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 30%;
+      background: linear-gradient(to top, #0b1229, transparent);
+      z-index: 1;
     }
-
-    /* Heart SVG styles */
-    svg{width:100%;height:100%;display:block}
-    .heart-fill{mix-blend-mode:screen}
-
-    /* Subtle clouds */
-    .cloud{position:absolute;width:220px;height:80px;left:10%;top:12%;filter:blur(8px) opacity:.15;transform:translate3d(0,0,0);}
-    .cloud.c2{left:68%;top:8%;width:280px;height:100px;opacity:.12}
-    .cloud.c3{left:52%;top:24%;width:180px;height:60px;opacity:.1}
-
-    /* Foreground greeting card */
-    .card{
-      position: absolute;left:50%;transform:translateX(-50%);bottom:8%;width:min(820px,92%);padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));backdrop-filter: blur(6px) saturate(130%);box-shadow: 0 10px 40px rgba(2,8,23,0.5);
-      display:flex;align-items:center;gap:1rem;z-index:3;border:1px solid rgba(255,255,255,0.04);
-    }
-    .avatar{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#1b1220;font-family:'Playfair Display';font-size:28px;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
-    .card .text{flex:1}
-    .card h1{margin:0;font-family:'Playfair Display';font-size:clamp(18px,2.6vw,26px);}
-    .card p{margin:6px 0 0 0;opacity:.9;font-size:clamp(14px,1.6vw,16px)}
-
-    /* small twinkling stars */
-    .stars{position:absolute;inset:0;z-index:0;pointer-events:none}
-    .star{position:absolute;width:3px;height:3px;border-radius:100%;background:white;opacity:0.08;filter:blur(.6px);animation:twinkle 6s linear infinite}
-    @keyframes twinkle{0%,100%{opacity:.06}50%{opacity:.18}}
-
-    /* responsive tweaks */
-    @media (max-width:600px){.sun-wrap{width:300px;height:300px}.card{bottom:6%;padding:1rem}.bg-message{font-size:28px}}
-
   </style>
 </head>
 <body>
 
-  <div class="bg-message">bonjour mon amour, est-ce que tu as bien dormi ?</div>
+  <div class="bg-text">bonjour mon amour,<br>est-ce que tu as bien dormi ?</div>
 
-  <div class="stage" role="main">
-
-    <!-- decorative clouds -->
-    <div class="cloud c1">
-      <svg viewBox="0 0 200 80" preserveAspectRatio="none"><ellipse cx="40" cy="40" rx="40" ry="24" fill="#fff"/></svg>
-    </div>
-    <div class="cloud c2">
-      <svg viewBox="0 0 260 90" preserveAspectRatio="none"><ellipse cx="60" cy="46" rx="60" ry="28" fill="#fff"/></svg>
-    </div>
-    <div class="cloud c3">
-      <svg viewBox="0 0 200 70" preserveAspectRatio="none"><ellipse cx="50" cy="34" rx="50" ry="22" fill="#fff"/></svg>
-    </div>
-
-    <!-- Heart-shaped sunrise -->
-    <div class="sun-wrap" aria-hidden="false">
-      <!-- rays -->
-      <svg class="rays" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <radialGradient id="g1" cx="50%" cy="45%">
-            <stop offset="0%" stop-color="#fff3e6" stop-opacity="1"/>
-            <stop offset="35%" stop-color="#ffd07a" stop-opacity="0.95"/>
-            <stop offset="70%" stop-color="#ff8fb1" stop-opacity="0.45"/>
-            <stop offset="100%" stop-color="#ff5ea0" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <g transform="translate(300,300)">
-          <!-- animated rays: rotate group -->
-          <g style="transform-origin:0 0; animation: spin 18s linear infinite;">
-            <!-- many long strokes -->
-            <g stroke="url(#g1)" stroke-width="18" stroke-linecap="round" opacity="0.8">
-              <line x1="0" y1="-70" x2="0" y2="-270" />
-              <line x1="30" y1="-60" x2="110" y2="-240" />
-              <line x1="-30" y1="-60" x2="-110" y2="-240" />
-              <line x1="70" y1="-30" x2="260" y2="-130" />
-              <line x1="-70" y1="-30" x2="-260" y2="-130" />
-              <line x1="120" y1="10" x2="360" y2="10" />
-              <line x1="-120" y1="10" x2="-360" y2="10" />
-            </g>
-          </g>
-        </g>
-      </svg>
-
-      <!-- heart SVG -->
-      <svg viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet" aria-label="Coeur se levant comme un soleil">
-        <defs>
-          <linearGradient id="lg" x1="0" x2="1">
-            <stop offset="0%" stop-color="#ff8fb1" />
-            <stop offset="60%" stop-color="#ffd07a" />
-            <stop offset="100%" stop-color="#fff1f7" stop-opacity="0.95"/>
-          </linearGradient>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="14" result="b" />
-            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-
-        <!-- soft halo -->
-        <g transform="translate(300,260)">
-          <circle r="140" fill="url(#lg)" opacity="0.12" filter="url(#glow)"></circle>
-        </g>
-
-        <!-- heart path centered -->
-        <g transform="translate(300,300) scale(0.9)">
-          <path d="M0 -120
-                   C75 -185 170 -120 170 -35
-                   C170 65 70 125 0 190
-                   C-70 125 -170 65 -170 -35
-                   C-170 -120 -75 -185 0 -120 Z"
-                fill="url(#lg)" class="heart-fill" filter="url(#glow)"/>
-
-          <!-- subtle stroke -->
-          <path d="M0 -120
-                   C75 -185 170 -120 170 -35
-                   C170 65 70 125 0 190
-                   C-70 125 -170 65 -170 -35
-                   C-170 -120 -75 -185 0 -120 Z"
-                fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="6"/>
-        </g>
-
-      </svg>
-    </div>
-
-    <div class="horizon" aria-hidden="true"></div>
-
-    <!-- greeting card with short note -->
-    <div class="card" role="region" aria-label="Message du matin">
-      <div class="avatar">G</div>
-      <div class="text">
-        <h1>Bonjour mon amour</h1>
-        <p>Est-ce que tu as bien dormi ? J'espère que tu as fait de beaux rêves. 🌸</p>
-      </div>
-    </div>
-
-    <!-- stars: randomly positioned -->
-    <div class="stars" aria-hidden="true">
-      <div class="star" style="left:6%;top:8%;animation-duration:7s"></div>
-      <div class="star" style="left:18%;top:20%;animation-duration:9s"></div>
-      <div class="star" style="left:34%;top:6%;animation-duration:6s"></div>
-      <div class="star" style="left:78%;top:14%;animation-duration:8s"></div>
-      <div class="star" style="left:86%;top:28%;animation-duration:10s"></div>
-    </div>
-
+  <div class="sun-container">
+    <div class="heart-sun"></div>
   </div>
 
-  <script>
-    // small spinning animation for rays
-    const style = document.createElement('style');
-    style.innerHTML = `@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`;
-    document.head.appendChild(style);
+  <div class="horizon"></div>
 
-    // gentle parallax with mouse move
-    const stage = document.querySelector('.stage');
-    document.addEventListener('mousemove', (e)=>{
-      const x = (e.clientX / window.innerWidth - 0.5) * 10;
-      const y = (e.clientY / window.innerHeight - 0.5) * 6;
-      document.querySelector('.sun-wrap').style.transform = `translateY(${ -10 + y }px) translateX(${x}px)`;
-      document.querySelector('.bg-message').style.transform = `translate(${ -x*1.6 }px, ${ -10 - y*1.2 }px)`;
-    });
-
-    // tiny entrance animation
-    window.addEventListener('load', ()=>{
-      document.querySelector('.sun-wrap').style.transition = 'transform 1.6s cubic-bezier(.2,.9,.3,1)';
-      document.querySelector('.sun-wrap').style.transform += ' scale(1)';
-      setTimeout(()=>{document.querySelector('.card').style.transform = 'translateX(-50%) translateY(0)'} , 900)
-    })
-  </script>
 </body>
 </html>
