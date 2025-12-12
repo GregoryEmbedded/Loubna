@@ -2,165 +2,223 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Scène — Cadeau de Gregos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bonjour mon amour</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0f1724;--card:#ffffff;--glass:rgba(255,255,255,0.06)}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
-    body{background:linear-gradient(180deg,#071029 0%, #0f1724 60%);display:flex;align-items:center;justify-content:center;color:#fff}
+    :root{
+      --bg1: #0f1022;
+      --bg2: #1b254b;
+      --accent1: #ff8fb1; /* rose */
+      --accent2: #ffd07a; /* jaune */
+      --soft: rgba(255,255,255,0.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    body{
+      background: linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 60%);
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;padding:3rem;
+      color:white;
+    }
 
-    /* scène container */
-    .scene{position:relative;width:100%;height:100vh;overflow:hidden}
+    /* Big background message */
+    .bg-message{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 6vw, 92px);
+      color: rgba(255,255,255,0.07);
+      transform: translateY(-10%);
+      text-align:center; padding: 2rem;
+      line-height:0.95;
+    }
 
-    /* couche décorative (étoiles / particules simples) */
-    .bg-decor{position:absolute;inset:0;pointer-events:none;opacity:.25}
+    .stage{
+      position:relative;z-index:2;width:min(1000px,95vw);height:min(700px,75vh);
+      display:grid;place-items:center;
+    }
 
-    /* boîte centrale qui contient le PDF */
-    .viewer{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);width:min(1100px,92vw);height:min(780px,86vh);backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));border-radius:14px;box-shadow:0 10px 40px rgba(2,6,23,.6);overflow:hidden;display:flex;flex-direction:column;opacity:0;transition:opacity .9s ease, transform .9s cubic-bezier(.2,.9,.2,1)}
+    /* Horizon ground */
+    .horizon{
+      position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(0deg,#07102a 0%, rgba(7,16,42,0.6) 50%, transparent 100%);border-top-left-radius:40px;border-top-right-radius:40px;z-index:1;filter:blur(6px) saturate(120%);
+    }
 
-    .viewer.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    /* Heart sun container */
+    .sun-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:420px;height:420px;}
 
-    /* entête de la carte */
-    .viewer .header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    .logo{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#ff9a9e,#fad0c4);display:flex;align-items:center;justify-content:center;color:#0b1020;font-weight:700}
-    .title{font-weight:600}
-    .controls{margin-left:auto;display:flex;gap:8px}
-    .btn{background:var(--glass);border:none;padding:8px 10px;border-radius:8px;color:inherit;cursor:pointer}
+    /* Floating animation */
+    .sun-wrap{animation:rise 8s ease-in-out infinite alternate;}
+    @keyframes rise{
+      from{transform:translateY(30px) scale(0.98)}
+      to{transform:translateY(-10px) scale(1.02)}
+    }
 
-    /* zone PDF */
-    .pdf-wrap{flex:1;background:#f6f7f9}
-    .pdf-wrap iframe{width:100%;height:100%;border:0;display:block}
+    /* Glow and rays */
+    .rays{
+      position:absolute;inset:0;pointer-events:none;z-index:0;filter:blur(12px) opacity(.9);
+      transform:scale(1.25);
+    }
 
-    /* fallback message */
-    .fallback{padding:18px;font-size:14px;color:#0b1020;background:#fff;text-align:center}
+    /* Heart SVG styles */
+    svg{width:100%;height:100%;display:block}
+    .heart-fill{mix-blend-mode:screen}
 
-    /* auto-open message */
-    .intro{position:absolute;left:50%;top:12vh;transform:translateX(-50%);background:rgba(255,255,255,0.04);padding:10px 16px;border-radius:999px;font-weight:600;backdrop-filter:blur(4px)}
+    /* Subtle clouds */
+    .cloud{position:absolute;width:220px;height:80px;left:10%;top:12%;filter:blur(8px) opacity:.15;transform:translate3d(0,0,0);}
+    .cloud.c2{left:68%;top:8%;width:280px;height:100px;opacity:.12}
+    .cloud.c3{left:52%;top:24%;width:180px;height:60px;opacity:.1}
 
-    @media (max-width:600px){.viewer{height:92vh;border-radius:12px}}
+    /* Foreground greeting card */
+    .card{
+      position: absolute;left:50%;transform:translateX(-50%);bottom:8%;width:min(820px,92%);padding:1.4rem 1.6rem;border-radius:18px;background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));backdrop-filter: blur(6px) saturate(130%);box-shadow: 0 10px 40px rgba(2,8,23,0.5);
+      display:flex;align-items:center;gap:1rem;z-index:3;border:1px solid rgba(255,255,255,0.04);
+    }
+    .avatar{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#1b1220;font-family:'Playfair Display';font-size:28px;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+    .card .text{flex:1}
+    .card h1{margin:0;font-family:'Playfair Display';font-size:clamp(18px,2.6vw,26px);}
+    .card p{margin:6px 0 0 0;opacity:.9;font-size:clamp(14px,1.6vw,16px)}
+
+    /* small twinkling stars */
+    .stars{position:absolute;inset:0;z-index:0;pointer-events:none}
+    .star{position:absolute;width:3px;height:3px;border-radius:100%;background:white;opacity:0.08;filter:blur(.6px);animation:twinkle 6s linear infinite}
+    @keyframes twinkle{0%,100%{opacity:.06}50%{opacity:.18}}
+
+    /* responsive tweaks */
+    @media (max-width:600px){.sun-wrap{width:300px;height:300px}.card{bottom:6%;padding:1rem}.bg-message{font-size:28px}}
+
   </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="bg-decor" aria-hidden>
-      <!-- décor : pluie de cœurs -->
-      <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="none" style="display:block">
-        <g fill="rgba(255,90,140,0.55)">
-          <!-- Génération de ~40 cœurs de tailles variées -->
-          
-          <!-- rangée 1 -->
-          <path d="M10 30 C 10 15, 30 15, 30 30 C 30 45, 10 55, 10 55 C 10 55, -10 45, -10 30 C -10 15, 10 15, 10 30 Z" transform="translate(80,60) scale(.9)"/>
-          <path transform="translate(220,40) scale(1.2)" d="M10 30 C 10 15, 30 15, 30 30 C 30 45, 10 55, 10 55 C 10 55, -10 45, -10 30 C -10 15, 10 15, 10 30 Z"/>
-          <path transform="translate(360,70) scale(1.4)" d="M10 30 C 10 15, 30 15, 30 30 C 30 45, 10 55, 10 55 C 10 55, -10 45, -10 30 C -10 15, 10 15, 10 30 Z"/>
-          <path transform="translate(500,50) scale(1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(640,80) scale(1.3)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(780,40) scale(1.1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(920,70) scale(1.5)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(1080,60) scale(.8)" d="M10 30 ... 10 30 Z"/>
 
-          <!-- rangée 2 -->
-          <path transform="translate(60,200) scale(1.4)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(200,240) scale(.9)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(340,220) scale(1.3)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(480,260) scale(1.1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(620,210) scale(1.5)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(760,250) scale(1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(900,230) scale(1.2)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(1040,260) scale(1.4)" d="M10 30 ... 10 30 Z"/>
+  <div class="bg-message">bonjour mon amour, est-ce que tu as bien dormi ?</div>
 
-          <!-- rangée 3 -->
-          <path transform="translate(100,380) scale(1.2)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(240,420) scale(1.4)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(380,390) scale(.9)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(520,430) scale(1.3)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(660,400) scale(1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(800,420) scale(1.5)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(940,390) scale(.8)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(1080,430) scale(1.2)" d="M10 30 ... 10 30 Z"/>
+  <div class="stage" role="main">
 
-          <!-- rangée 4 -->
-          <path transform="translate(70,560) scale(1.3)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(220,600) scale(.95)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(360,580) scale(1.4)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(500,620) scale(1.2)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(640,580) scale(1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(780,610) scale(1.5)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(920,590) scale(1.1)" d="M10 30 ... 10 30 Z"/>
-          <path transform="translate(1060,620) scale(.9)" d="M10 30 ... 10 30 Z"/>
+    <!-- decorative clouds -->
+    <div class="cloud c1">
+      <svg viewBox="0 0 200 80" preserveAspectRatio="none"><ellipse cx="40" cy="40" rx="40" ry="24" fill="#fff"/></svg>
+    </div>
+    <div class="cloud c2">
+      <svg viewBox="0 0 260 90" preserveAspectRatio="none"><ellipse cx="60" cy="46" rx="60" ry="28" fill="#fff"/></svg>
+    </div>
+    <div class="cloud c3">
+      <svg viewBox="0 0 200 70" preserveAspectRatio="none"><ellipse cx="50" cy="34" rx="50" ry="22" fill="#fff"/></svg>
+    </div>
 
+    <!-- Heart-shaped sunrise -->
+    <div class="sun-wrap" aria-hidden="false">
+      <!-- rays -->
+      <svg class="rays" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="g1" cx="50%" cy="45%">
+            <stop offset="0%" stop-color="#fff3e6" stop-opacity="1"/>
+            <stop offset="35%" stop-color="#ffd07a" stop-opacity="0.95"/>
+            <stop offset="70%" stop-color="#ff8fb1" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#ff5ea0" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(300,300)">
+          <!-- animated rays: rotate group -->
+          <g style="transform-origin:0 0; animation: spin 18s linear infinite;">
+            <!-- many long strokes -->
+            <g stroke="url(#g1)" stroke-width="18" stroke-linecap="round" opacity="0.8">
+              <line x1="0" y1="-70" x2="0" y2="-270" />
+              <line x1="30" y1="-60" x2="110" y2="-240" />
+              <line x1="-30" y1="-60" x2="-110" y2="-240" />
+              <line x1="70" y1="-30" x2="260" y2="-130" />
+              <line x1="-70" y1="-30" x2="-260" y2="-130" />
+              <line x1="120" y1="10" x2="360" y2="10" />
+              <line x1="-120" y1="10" x2="-360" y2="10" />
+            </g>
+          </g>
         </g>
+      </svg>
+
+      <!-- heart SVG -->
+      <svg viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet" aria-label="Coeur se levant comme un soleil">
+        <defs>
+          <linearGradient id="lg" x1="0" x2="1">
+            <stop offset="0%" stop-color="#ff8fb1" />
+            <stop offset="60%" stop-color="#ffd07a" />
+            <stop offset="100%" stop-color="#fff1f7" stop-opacity="0.95"/>
+          </linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="14" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- soft halo -->
+        <g transform="translate(300,260)">
+          <circle r="140" fill="url(#lg)" opacity="0.12" filter="url(#glow)"></circle>
+        </g>
+
+        <!-- heart path centered -->
+        <g transform="translate(300,300) scale(0.9)">
+          <path d="M0 -120
+                   C75 -185 170 -120 170 -35
+                   C170 65 70 125 0 190
+                   C-70 125 -170 65 -170 -35
+                   C-170 -120 -75 -185 0 -120 Z"
+                fill="url(#lg)" class="heart-fill" filter="url(#glow)"/>
+
+          <!-- subtle stroke -->
+          <path d="M0 -120
+                   C75 -185 170 -120 170 -35
+                   C170 65 70 125 0 190
+                   C-70 125 -170 65 -170 -35
+                   C-170 -120 -75 -185 0 -120 Z"
+                fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="6"/>
+        </g>
+
       </svg>
     </div>
 
-    <div class="intro">Ouverture du cadeau…</div>
+    <div class="horizon" aria-hidden="true"></div>
 
-    <div id="viewer" class="viewer" role="region" aria-label="Document cadeau de Gregos">
-      <div class="header">
-        <div class="logo">GG</div>
-        <div class="title">Cadeau de Gregos — Aperçu</div>
-        <div class="controls">
-          <button id="closeBtn" class="btn" title="Fermer">✕</button>
-          <button id="downloadBtn" class="btn" title="Télécharger">⬇</button>
-        </div>
+    <!-- greeting card with short note -->
+    <div class="card" role="region" aria-label="Message du matin">
+      <div class="avatar">G</div>
+      <div class="text">
+        <h1>Bonjour mon amour</h1>
+        <p>Est-ce que tu as bien dormi ? J'espère que tu as fait de beaux rêves. 🌸</p>
       </div>
-      <div class="pdf-wrap" id="pdfWrap">
-        <!-- L'iframe sera remplie par JavaScript pour permettre l'animation d'apparition -->
-        <iframe id="pdfFrame" src="about:blank" aria-label="PDF: cadeau de gregos"></iframe>
-      </div>
+    </div>
+
+    <!-- stars: randomly positioned -->
+    <div class="stars" aria-hidden="true">
+      <div class="star" style="left:6%;top:8%;animation-duration:7s"></div>
+      <div class="star" style="left:18%;top:20%;animation-duration:9s"></div>
+      <div class="star" style="left:34%;top:6%;animation-duration:6s"></div>
+      <div class="star" style="left:78%;top:14%;animation-duration:8s"></div>
+      <div class="star" style="left:86%;top:28%;animation-duration:10s"></div>
     </div>
 
   </div>
 
   <script>
-    // Nom du fichier PDF — si le nom contient des espaces, encodez-le comme ci-dessous ou mettez le chemin correct.
-    const pdfFile = encodeURI('Cadeau de gregos.pdf');
-    // Si votre PDF est dans un sous-dossier, par exemple 'assets/cadeau_de_gregos.pdf', remplacez pdfFile par ce chemin.
+    // small spinning animation for rays
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`;
+    document.head.appendChild(style);
 
-    const viewer = document.getElementById('viewer');
-    const frame = document.getElementById('pdfFrame');
-    const closeBtn = document.getElementById('closeBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-
-    // comportement: ouvrir automatiquement avec une animation
-    window.addEventListener('DOMContentLoaded', ()=>{
-      // petite temporisation pour laisser voir le message "Ouverture du cadeau..."
-      setTimeout(()=>{
-        // injecte l'iframe. Utilise l'usage natif du navigateur pour afficher le PDF.
-        frame.src = pdfFile;
-        // montre la carte avec transition
-        requestAnimationFrame(()=> viewer.classList.add('show'));
-      }, 600);
+    // gentle parallax with mouse move
+    const stage = document.querySelector('.stage');
+    document.addEventListener('mousemove', (e)=>{
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 6;
+      document.querySelector('.sun-wrap').style.transform = `translateY(${ -10 + y }px) translateX(${x}px)`;
+      document.querySelector('.bg-message').style.transform = `translate(${ -x*1.6 }px, ${ -10 - y*1.2 }px)`;
     });
 
-    // fermer la vue (retire la carte)
-    closeBtn.addEventListener('click', ()=>{
-      viewer.classList.remove('show');
-      // libère la ressource
-      setTimeout(()=> frame.src = 'about:blank', 600);
-    });
-
-    // téléchargement direct
-    downloadBtn.addEventListener('click', ()=>{
-      const a = document.createElement('a');
-      a.href = pdfFile;
-      a.download = '';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
-
-    // accessibilité: fermer avec Escape
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape'){
-        viewer.classList.remove('show');
-        setTimeout(()=> frame.src = 'about:blank', 600);
-      }
-    });
+    // tiny entrance animation
+    window.addEventListener('load', ()=>{
+      document.querySelector('.sun-wrap').style.transition = 'transform 1.6s cubic-bezier(.2,.9,.3,1)';
+      document.querySelector('.sun-wrap').style.transform += ' scale(1)';
+      setTimeout(()=>{document.querySelector('.card').style.transform = 'translateX(-50%) translateY(0)'} , 900)
+    })
   </script>
-
-  <!-- Fallback: si le navigateur ne supporte pas l'affichage dans l'iframe, l'utilisateur verra un lien pour télécharger le PDF -->
-  <noscript>
-    <div class="fallback">Veuillez activer JavaScript pour afficher le document. <a href="cadeau%20de%20gregos.pdf" download>Télécharger le PDF</a></div>
-  </noscript>
 </body>
 </html>
