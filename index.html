@@ -31,7 +31,6 @@
     position:relative;
   }
 
-  /* Container for the flower */
   .flower-wrap{
     display:flex;
     align-items:center;
@@ -47,7 +46,7 @@
     height:auto;
   }
 
-  /* Petals — already open by default */
+  /* Petals — already open (static state) */
   .petal{
     transform-origin: 50% 90%;
     transform-box: fill-box;
@@ -55,7 +54,7 @@
     transform: scaleY(1);
   }
 
-  /* Animation only triggered when replaying */
+  /* Animation */
   .petal.animate {
     opacity:0;
     transform: scaleY(0.05) translateY(5%);
@@ -73,6 +72,7 @@
     transform:scale(1);
     transform-origin:center;
   }
+
   .center.animate{
     opacity:0;
     transform:scale(0.4);
@@ -83,7 +83,6 @@
     to{opacity:1;transform:scale(1);}
   }
 
-  /* Message */
   .message{
     position:absolute;
     width:60%;
@@ -95,8 +94,6 @@
     font-size:clamp(18px, 3.2vw, 30px);
     opacity:1;
   }
-
-  .message.hide{opacity:0;}
 
   .typing{
     border-right:2px solid var(--text);
@@ -142,7 +139,6 @@
       </defs>
 
       <g transform="translate(300,300)">
-        <!-- 8 pétales -->
         <g class="petal" style="transform: rotate(0deg);">
           <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
         </g>
@@ -173,8 +169,8 @@
       </g>
     </svg>
 
-    <div class="message" id="message">
-      <span class="typing" id="typed">Ma chérie, je t'aime plus fort</span>
+    <div class="message">
+      <span class="typing" id="typed"></span>
     </div>
   </div>
 
@@ -186,17 +182,14 @@
 <script>
 const petals = document.querySelectorAll('.petal');
 const center = document.querySelector('.center');
-const message = document.getElementById('message');
 const typed = document.getElementById('typed');
 const replay = document.getElementById('replay');
-
 const fullText = "Ma chérie, je t'aime plus fort";
 
-function replayAnimation(){
-  // reset
+function animateFlower(){
   petals.forEach((p,i)=>{
     p.classList.remove('animate');
-    void p.offsetWidth;
+    void p.offsetWidth; // force repaint
     p.style.animationDelay = (i*0.08)+'s';
     p.classList.add('animate');
   });
@@ -205,17 +198,19 @@ function replayAnimation(){
   void center.offsetWidth;
   center.classList.add('animate');
 
-  // retape le message
   typed.textContent = "";
-  message.classList.remove('hide');
-
-  let t = 0;
   for(let i=0; i<=fullText.length; i++){
     setTimeout(()=> typed.textContent = fullText.slice(0,i), 1000 + i*45);
   }
 }
 
-replay.addEventListener('click', replayAnimation);
+// ▶️ Auto-animation au chargement
+window.addEventListener('load', () => {
+  setTimeout(animateFlower, 300);
+});
+
+// ▶️ Rejouer
+replay.addEventListener('click', animateFlower);
 </script>
 
 </body>
