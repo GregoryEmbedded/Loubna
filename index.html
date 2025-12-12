@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bonjour mon amour</title>
+
   <style>
     body {
       margin: 0;
@@ -11,74 +12,183 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(#1a2340, #fcb1b1);
-      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(#0d1226, #f7b0c3);
+      font-family: 'Arial', sans-serif;
       overflow: hidden;
     }
 
+    /* Texte du fond */
     .bg-text {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 3.2rem;
-      color: rgba(255,255,255,0.18); /* texte plus visible */
+      font-size: 3.6rem;
+      color: rgba(255, 255, 255, 0.16);
       text-align: center;
       width: 95%;
-      line-height: 1.25;
+      line-height: 1.2;
       z-index: 0;
       font-weight: 600;
       user-select: none;
     }
 
+    /* Soleil cœur */
     .sun-container {
       position: relative;
-      width: 350px;
-      height: 350px;
+      width: 420px;
+      height: 420px;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 2;
+      z-index: 4;
       animation: float 4s ease-in-out infinite alternate;
     }
 
     @keyframes float {
-      0%   { transform: translateY(35px) scale(0.95); }
-      50%  { transform: translateY(0px) scale(1); }
-      100% { transform: translateY(-15px) scale(1.03); }
-    }
-      to   { transform: translateY(-10px); }
+      0%   { transform: translateY(40px) scale(0.9); }
+      50%  { transform: translateY(10px) scale(1); }
+      100% { transform: translateY(-20px) scale(1.05); }
     }
 
-    /* Heart sunrise */
     .heart-sun {
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, #ffd27f, #ff9bd4);
+      background: radial-gradient(circle at center, #ffe08a, #ff7ecb);
       clip-path: path("M150 30 C190 -20, 280 20, 280 110 C280 200, 200 240, 150 300 C100 240, 20 200, 20 110 C20 20, 110 -20, 150 30 Z");
-      filter: drop-shadow(0 0 25px rgba(255,180,180,0.9));
+      filter: drop-shadow(0 0 40px rgba(255,150,150,0.9));
     }
 
-    /* Horizon */
+    /* Rayons animés */
+    .rays {
+      position: absolute;
+      width: 580px;
+      height: 580px;
+      z-index: 3;
+      animation: spin 18s linear infinite;
+      opacity: 0.55;
+      pointer-events: none;
+      filter: blur(2px);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Horizon sombre */
     .horizon {
       position: absolute;
       bottom: 0;
       width: 100%;
-      height: 30%;
+      height: 32%;
       background: linear-gradient(to top, #0b1229, transparent);
       z-index: 1;
     }
+
+    /* Nuages doux */
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50px;
+      filter: blur(6px);
+      animation: drift 35s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes drift {
+      0% { transform: translateX(-20vw); }
+      100% { transform: translateX(120vw); }
+    }
+
+    .cloud.c1 { width: 180px; height: 60px; top: 18%; animation-duration: 40s; opacity: 0.4; }
+    .cloud.c2 { width: 260px; height: 80px; top: 30%; animation-duration: 55s; opacity: 0.35; }
+    .cloud.c3 { width: 140px; height: 50px; top: 10%; animation-duration: 50s; opacity: 0.28; }
+
+    /* Étoiles scintillantes */
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.06;
+      animation: twinkle 6s infinite ease-in-out;
+      filter: blur(1px);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.05; }
+      50% { opacity: 0.25; }
+    }
   </style>
 </head>
+
 <body>
 
+  <!-- Musique douce -->
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7fb5bc4978.mp3" type="audio/mp3">
+  </audio>
+
+  <!-- Texte du fond -->
   <div class="bg-text">bonjour mon amour,<br>est-ce que tu as bien dormi ?</div>
 
+  <!-- Rayons -->
+  <svg class="rays" viewBox="0 0 600 600">
+    <g stroke="rgba(255,230,200,0.6)" stroke-width="18" stroke-linecap="round">
+      <line x1="300" y1="20" x2="300" y2="140"/>
+      <line x1="420" y1="60" x2="350" y2="150"/>
+      <line x1="510" y1="150" x2="380" y2="200"/>
+      <line x1="560" y1="280" x2="420" y2="280"/>
+      <line x1="510" y1="410" x2="380" y2="360"/>
+      <line x1="420" y1="500" x2="350" y2="430"/>
+      <line x1="300" y1="560" x2="300" y2="450"/>
+      <line x1="180" y1="500" x2="240" y2="430"/>
+      <line x1="90" y1="410" x2="220" y2="360"/>
+      <line x1="40" y1="280" x2="180" y2="280"/>
+      <line x1="90" y1="150" x2="220" y2="200"/>
+      <line x1="180" y1="60" x2="240" y2="150"/>
+    </g>
+  </svg>
+
+  <!-- Soleil en forme de cœur -->
   <div class="sun-container">
     <div class="heart-sun"></div>
   </div>
 
+  <!-- Nuages -->
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+
+  <!-- Horizon -->
   <div class="horizon"></div>
+
+  <!-- Étoiles scintillantes -->
+  <div class="stars"></div>
+
+  <script>
+    /* Génération des étoiles */
+    const stars = document.querySelector(".stars");
+
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement("div");
+      s.classList.add("star");
+      s.style.top = Math.random() * 50 + "%";
+      s.style.left = Math.random() * 100 + "%";
+      s.style.animationDuration = (4 + Math.random() * 4) + "s";
+      stars.appendChild(s);
+    }
+  </script>
 
 </body>
 </html>
