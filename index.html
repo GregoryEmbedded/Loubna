@@ -14,13 +14,12 @@
     --text: #3b1f2b;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+  html,body{height:100%;margin:0;font-family: 'Montserrat', sans-serif;}
   body{
     display:flex;
     align-items:center;
     justify-content:center;
-    background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.03), transparent 8%),
-                linear-gradient(180deg,var(--bg1) 0%, #3a2b47 45%, var(--bg2) 100%);
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
     color:var(--text);
     overflow:hidden;
     padding:2rem;
@@ -28,19 +27,8 @@
 
   .stage{
     width:min(920px,96vw);
-    max-width:920px;
     text-align:center;
     position:relative;
-  }
-
-  h1{
-    margin:0 0 14px 0;
-    color:rgba(255,255,255,0.92);
-    font-family: 'Playfair Display', serif;
-    font-size:clamp(18px,2.6vw,22px);
-    font-weight:600;
-    letter-spacing:0.6px;
-    text-shadow:0 4px 18px rgba(0,0,0,0.5);
   }
 
   /* Container for the flower */
@@ -53,295 +41,182 @@
     margin:0 auto;
   }
 
-  /* SVG scales nicely */
   svg.flower{
     width:80vmin;
     max-width:640px;
     height:auto;
-    display:block;
-    filter: drop-shadow(0 18px 40px rgba(20,8,30,0.6));
   }
 
-  /* Petal animation: from folded (scaleY 0.06) to open (scaleY 1) with stagger */
+  /* Petals — already open by default */
   .petal{
     transform-origin: 50% 90%;
     transform-box: fill-box;
+    opacity:1;
+    transform: scaleY(1);
+  }
+
+  /* Animation only triggered when replaying */
+  .petal.animate {
+    opacity:0;
+    transform: scaleY(0.05) translateY(5%);
     animation: openPetal 900ms cubic-bezier(.2,.9,.25,1) forwards;
   }
 
   @keyframes openPetal{
-    0%   { transform: translateY(6%) scaleY(0.06) translateX(0%); opacity:0.0; }
+    0%   { transform: scaleY(0.05) translateY(5%); opacity:0; }
     60%  { opacity:1; }
-    100% { transform: translateY(0%) scaleY(1) translateX(0%); opacity:1; }
+    100% { transform: scaleY(1) translateY(0%); opacity:1; }
   }
 
-  /* Center circle pop */
-  .center {
-    transform-origin: 50% 50%;
-    transform-box: fill-box;
+  .center{
+    opacity:1;
+    transform:scale(1);
+    transform-origin:center;
+  }
+  .center.animate{
     opacity:0;
-    transform: scale(0.6);
-    animation: centerPop 600ms cubic-bezier(.2,.9,.25,1) 1s forwards;
-  }
-  @keyframes centerPop{
-    to { opacity:1; transform: scale(1); }
+    transform:scale(0.4);
+    animation:centerPop 600ms cubic-bezier(.2,.9,.25,1) forwards 0.9s;
   }
 
-  /* Message box in center (hidden then typed) */
-  .message {
+  @keyframes centerPop{
+    to{opacity:1;transform:scale(1);}
+  }
+
+  /* Message */
+  .message{
     position:absolute;
-    width:62%;
-    max-width:420px;
+    width:60%;
     left:50%;
     top:50%;
     transform:translate(-50%,-50%);
-    pointer-events:none;
-    z-index:6;
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(18px, 3.2vw, 30px);
-    color: var(--text);
     text-align:center;
-    line-height:1.05;
-    opacity:0;
+    font-family: 'Playfair Display', serif;
+    font-size:clamp(18px, 3.2vw, 30px);
+    opacity:1;
   }
 
-  .message.show { opacity:1; }
+  .message.hide{opacity:0;}
 
-  /* typing effect caret */
-  .typing {
-    border-right: 2px solid rgba(59,31,43,0.9);
+  .typing{
+    border-right:2px solid var(--text);
     padding-right:2px;
     white-space:nowrap;
     overflow:hidden;
-    display:inline-block;
-    vertical-align:middle;
   }
 
-  /* replay button */
   .controls{
-    margin-top:18px;
-    display:flex;
-    gap:12px;
-    justify-content:center;
+    margin-top:20px;
   }
   button{
-    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-    color: #fff;
-    border:1px solid rgba(255,255,255,0.08);
-    padding:10px 14px;
+    background:#ffffff22;
+    color:white;
+    border:1px solid #ffffff44;
+    padding:10px 16px;
     border-radius:10px;
     cursor:pointer;
-    box-shadow:0 6px 18px rgba(0,0,0,0.4);
-    backdrop-filter: blur(6px);
-    font-weight:600;
-  }
-  button.secondary{
-    background:transparent;
-    border:1px solid rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.86);
-  }
-
-  /* Respect users preferring reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .petal { animation: none; transform:scaleY(1); opacity:1; }
-    .center { animation: none; transform:scale(1); opacity:1; }
+    backdrop-filter:blur(6px);
   }
 </style>
 </head>
 <body>
-  <div class="stage" role="main" aria-label="Carte d'amour — fleur qui s'ouvre">
-    <h1>Un petit moment pour toi</h1>
 
-    <div class="flower-wrap" aria-hidden="false">
-      <!-- SVG Flower: 8 pétales + center -->
-      <svg class="flower" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" aria-labelledby="flowerTitle flowerDesc" role="img">
-        <title id="flowerTitle">Fleur qui s'ouvre</title>
-        <desc id="flowerDesc">Une fleur stylisée dont les pétales s'ouvrent et dévoilent un message d'amour.</desc>
+<div class="stage">
+  <h2 style="color:white; font-family:'Playfair Display', serif; text-shadow:0 2px 6px black;">
+    Une fleur pour toi
+  </h2>
 
-        <!-- Defs for gradients -->
-        <defs>
-          <radialGradient id="petalGrad" cx="50%" cy="30%">
-            <stop offset="0%" stop-color="#fff7f8" stop-opacity="0.95"/>
-            <stop offset="40%" stop-color="#ffd07a" stop-opacity="0.98"/>
-            <stop offset="100%" stop-color="#ff6fa3"/>
-          </radialGradient>
+  <div class="flower-wrap">
+    <svg class="flower" viewBox="0 0 600 600">
+      <defs>
+        <radialGradient id="petalGrad">
+          <stop offset="0%" stop-color="#fff6fb"/>
+          <stop offset="40%" stop-color="#ffd7a8"/>
+          <stop offset="100%" stop-color="#ff6fa3"/>
+        </radialGradient>
 
-          <radialGradient id="petalGrad2" cx="50%" cy="30%">
-            <stop offset="0%" stop-color="#fff3e6" stop-opacity="0.95"/>
-            <stop offset="40%" stop-color="#ffd7a8" stop-opacity="0.98"/>
-            <stop offset="100%" stop-color="#ff9bd4"/>
-          </radialGradient>
+        <radialGradient id="centerGrad">
+          <stop offset="0%" stop-color="#fff9e6"/>
+          <stop offset="100%" stop-color="#fff0a8"/>
+        </radialGradient>
+      </defs>
 
-          <radialGradient id="centerGrad" cx="50%" cy="40%">
-            <stop offset="0%" stop-color="#fff9e6"/>
-            <stop offset="60%" stop-color="#fff1c8"/>
-            <stop offset="100%" stop-color="#fff0a8"/>
-          </radialGradient>
-
-          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="10" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-
-        <!-- Petals: made with ellipses rotated around center -->
-        <g transform="translate(300,300)">
-          <!-- each petal has class petal and inline animation-delay via style -->
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.08s;">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.16s; transform: rotate(45deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad2)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.24s; transform: rotate(90deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.32s; transform: rotate(135deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad2)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.40s; transform: rotate(180deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.48s; transform: rotate(225deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad2)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.56s; transform: rotate(270deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)" transform="rotate(0)"/>
-          </g>
-
-          <g class="petal" style="transform-origin:50% 88%; animation-delay: 0.64s; transform: rotate(315deg);">
-            <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad2)" transform="rotate(0)"/>
-          </g>
-
-          <!-- center circle -->
-          <circle class="center" r="72" fill="url(#centerGrad)" stroke="#fff5d9" stroke-opacity="0.8" stroke-width="3" filter="url(#softGlow)"/>
+      <g transform="translate(300,300)">
+        <!-- 8 pétales -->
+        <g class="petal" style="transform: rotate(0deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
         </g>
-      </svg>
+        <g class="petal" style="transform: rotate(45deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(90deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(135deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(180deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(225deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(270deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
+        <g class="petal" style="transform: rotate(315deg);">
+          <ellipse cx="0" cy="-140" rx="64" ry="170" fill="url(#petalGrad)"/>
+        </g>
 
-      <!-- Message that appears in the center -->
-      <div class="message" id="message" aria-live="polite">
-        <span class="typing" id="typed"></span>
-      </div>
-    </div>
+        <!-- Centre -->
+        <circle class="center" r="72" fill="url(#centerGrad)" stroke="#fff5d9" stroke-width="3"/>
+      </g>
+    </svg>
 
-    <!-- Controls -->
-    <div class="controls" aria-hidden="false">
-      <button id="replay">Réouvrir la fleur</button>
-      <button id="instant" class="secondary">Afficher tout</button>
+    <div class="message" id="message">
+      <span class="typing" id="typed">Ma chérie, je t'aime plus fort</span>
     </div>
   </div>
 
+  <div class="controls">
+    <button id="replay">Réouvrir la fleur 🌸</button>
+  </div>
+</div>
+
 <script>
-  // MESSAGE config
-  const fullText = "Ma chérie, je t'aime plus fort";
-  const typingSpeed = 55; // ms per character
-  const messageEl = document.getElementById('message');
-  const typedEl = document.getElementById('typed');
-  const replayBtn = document.getElementById('replay');
-  const instantBtn = document.getElementById('instant');
+const petals = document.querySelectorAll('.petal');
+const center = document.querySelector('.center');
+const message = document.getElementById('message');
+const typed = document.getElementById('typed');
+const replay = document.getElementById('replay');
 
-  // Query petals & center (they are G and circle under svg)
-  const petals = document.querySelectorAll('.petal');
-  const center = document.querySelector('.center');
+const fullText = "Ma chérie, je t'aime plus fort";
 
-  // utility: reset animations
-  function resetFlower(){
-    // hide message
-    messageEl.classList.remove('show');
-    typedEl.textContent = '';
-    // Reset petal styles to initial folded state
-    petals.forEach((p, i) => {
-      p.style.animation = 'none';
-      // force reflow to restart animation
-      void p.offsetWidth;
-      // reapply with staggered delays
-      const delay = (0.08 + i*0.08);
-      p.style.animation = `openPetal 900ms cubic-bezier(.2,.9,.25,1) forwards`;
-      p.style.animationDelay = `${delay}s`;
-    });
-
-    // reset center animation
-    center.style.animation = 'none';
-    void center.offsetWidth;
-    center.style.animation = `centerPop 600ms cubic-bezier(.2,.9,.25,1) 1s forwards`;
-  }
-
-  // typing effect
-  let typingTimeouts = [];
-  function typeMessage(){
-    messageEl.classList.add('show');
-    typedEl.textContent = '';
-    typingTimeouts.forEach(t => clearTimeout(t));
-    typingTimeouts = [];
-    // start after center pop completes (1s) + a bit
-    const startDelay = 1400;
-    for(let i=0;i<=fullText.length;i++){
-      const t = setTimeout(() => {
-        typedEl.textContent = fullText.slice(0,i);
-        if(i === fullText.length){
-          // remove caret after finish
-          typedEl.style.borderRight = 'none';
-        }
-      }, startDelay + i*typingSpeed);
-      typingTimeouts.push(t);
-    }
-  }
-
-  // Combined sequence
-  function openAndShow(){
-    resetFlower();
-    // ensure message hidden immediately
-    messageEl.classList.remove('show');
-    typedEl.style.borderRight = '2px solid rgba(59,31,43,0.9)';
-    // Wait for petals+center animations to reach revealing moment
-    const totalWait = 1400 + fullText.length * typingSpeed; // rough
-    // Start typing after 1.4s (center pop)
-    setTimeout(typeMessage, 1400);
-    // Re-enable buttons after full sequence
-    replayBtn.disabled = true;
-    instantBtn.disabled = true;
-    setTimeout(() => { replayBtn.disabled = false; instantBtn.disabled = false; }, totalWait + 300);
-  }
-
-  // instant reveal (no typing)
-  function instantReveal(){
-    // stop typing timeouts
-    typingTimeouts.forEach(t => clearTimeout(t));
-    typedEl.textContent = fullText;
-    typedEl.style.borderRight = 'none';
-    messageEl.classList.add('show');
-  }
-
-  // Set up initial run on load
-  window.addEventListener('load', () => {
-    // start with petals collapsed visually if user has reduced-motion?
-    resetFlower();
-    // small delay so initial animation is visible
-    setTimeout(openAndShow, 180);
+function replayAnimation(){
+  // reset
+  petals.forEach((p,i)=>{
+    p.classList.remove('animate');
+    void p.offsetWidth;
+    p.style.animationDelay = (i*0.08)+'s';
+    p.classList.add('animate');
   });
 
-  // Buttons
-  replayBtn.addEventListener('click', () => {
-    openAndShow();
-  });
+  center.classList.remove('animate');
+  void center.offsetWidth;
+  center.classList.add('animate');
 
-  instantBtn.addEventListener('click', instantReveal);
+  // retape le message
+  typed.textContent = "";
+  message.classList.remove('hide');
 
-  // Accessibility: allow keyboard to trigger replay with Enter/Space
-  replayBtn.addEventListener('keyup', (e) => { if(e.key === 'Enter' || e.key === ' ') openAndShow(); });
-
-  // Respect prefers-reduced-motion: if reduced, immediately show everything without animations
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    petals.forEach(p => { p.style.transform = 'scaleY(1)'; p.style.opacity = '1'; });
-    center.style.transform = 'scale(1)'; center.style.opacity = '1';
-    typedEl.textContent = fullText; messageEl.classList.add('show');
+  let t = 0;
+  for(let i=0; i<=fullText.length; i++){
+    setTimeout(()=> typed.textContent = fullText.slice(0,i), 1000 + i*45);
   }
+}
+
+replay.addEventListener('click', replayAnimation);
 </script>
+
 </body>
 </html>
